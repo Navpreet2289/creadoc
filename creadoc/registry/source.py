@@ -1,8 +1,50 @@
 # coding: utf-8
 import abc
-from creadoc.exceptions import SourceValidationException
+from creadoc.exceptions import (
+    SourceValidationException,
+    SourceTagDuplicateException)
+from creadoc.helper.cls import Singletone
 
 __author__ = 'damirazo <me@damirazo.ru>'
+
+
+@Singletone
+class SourceRegistry(object):
+    u"""
+    Реестр источников данных
+    """
+
+    # Зарегистрированные источники данных
+    _data = {}
+
+    def register(self, source):
+        u"""
+        Регистрация источника данных в реестре
+        """
+        assert issubclass(source, Source), (
+            u'Источник данных должен являться потомком класса Source')
+
+        tag = source.tag
+
+        if tag in self._data:
+            raise SourceTagDuplicateException((
+                u'Тег {} уже используется в источнике данных {}'
+            ).format(tag, self._data[tag].__name__))
+
+        self._data[tag] = source
+
+    def source_by_tag(self, tag):
+        u"""
+        Поиск источника данных с указанным тегом
+        """
+        return self._data.get(tag)
+
+    def sources(self):
+        u"""
+        Список всех зарегистрированных источников данных
+        """
+        return self._data
+
 
 
 class Source(object):
@@ -46,7 +88,7 @@ class Source(object):
         raise NotImplementedError
 
     @classmethod
-    def validate_children(cls, fields):
+    def check_children(cls, fields):
         u"""
         Проверка на наличие указанной иерархии в дочерних полях
         """
@@ -57,13 +99,15 @@ class Source(object):
         # и при этом у него есть потомки
         if checked_field and not cls.fields:
             raise SourceValidationException
+
         # Проверяем что указанный потомок есть в списке потомков
         # данного источника
         elif cls.fields and checked_field not in cls.fields:
             raise SourceValidationException
+
         # Проверяем, что еще остались потомки
         elif children_fields:
-            cls.fields[checked_field].validate_children(children_fields)
+            cls.fields[checked_field].check_children(children_fields)
 
 
 class AttributeSource(Source):
@@ -72,4 +116,4 @@ class AttributeSource(Source):
         self.attr_name = attr_name
 
     def data(self):
-        return getattr(self.parent, self.attr_name, 'sdfsd')
+        return getattr(self.parent, self.attr_name, '')

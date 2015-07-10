@@ -1,7 +1,7 @@
 # coding: utf-8
 from creadoc.document.document import CreaDoc
 from creadoc.exceptions import SourceValidationException
-from creadoc.registry.registry import SourceRegistry
+from creadoc.registry.source import SourceRegistry
 
 __author__ = 'damirazo <me@damirazo.ru>'
 
@@ -55,7 +55,7 @@ class DocumentPreprocessor(object):
                 continue
 
             try:
-                source.validate_children(segments[1:])
+                source.check_children(segments[1:])
             except SourceValidationException as exc:
                 result[tag] = False
                 continue

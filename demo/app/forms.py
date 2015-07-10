@@ -1,9 +1,40 @@
 # coding: utf-8
-from m3_ext.ui.containers import ExtForm, ExtToolBar
+from m3_ext.ui.containers import (
+    ExtForm, ExtToolBar)
 from m3_ext.ui.controls import ExtButton
-from m3_ext.ui.windows import ExtEditWindow
+from m3_ext.ui.panels import ExtObjectGrid
+from m3_ext.ui.windows import ExtEditWindow, ExtWindow
+
+from creadoc.helper.ui import bind_reports_to_grid
 
 __author__ = 'damirazo <me@damirazo.ru>'
+
+
+class BaseListWindow(ExtWindow):
+    u"""
+    Базовое окно списка записей
+    """
+
+    columns = []
+
+    def __init__(self):
+        super(BaseListWindow, self).__init__()
+
+        self.grid = self.create_base_grid()
+        self.items.append(self.grid)
+
+    def create_base_grid(self):
+        grid = ExtObjectGrid(region='center')
+        grid.width = 400
+        grid.allow_paging = False
+
+        for column in self.columns:
+            grid.add_column(**column)
+
+        return grid
+
+    def bind_reports(self, pack):
+        bind_reports_to_grid(self.grid, pack)
 
 
 class BaseEditWindow(ExtEditWindow):

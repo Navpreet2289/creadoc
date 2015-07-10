@@ -1,8 +1,6 @@
 # coding: utf-8
 from m3_ext.ui.windows.edit_window import ExtEditWindow
-from m3_ext.ui.controls.buttons import ExtButton
-from m3_ext.ui.windows.window import ExtWindow
-from m3_ext.ui.panels.grids import ExtObjectGrid
+from demo.app.forms import BaseListWindow
 
 
 class CarEditWindow(ExtEditWindow):
@@ -10,7 +8,7 @@ class CarEditWindow(ExtEditWindow):
         super(CarEditWindow, self).__init__(*args, **kwargs)
 
 
-class CarListWindow(ExtWindow):
+class CarListWindow(BaseListWindow):
     u"""
     """
 
@@ -38,15 +36,3 @@ class CarListWindow(ExtWindow):
         self.maximized = False
         self.maximizable = False
         self.minimizable = True
-
-        self.grid = self._create_grid()
-
-        self.items.append(self.grid)
-
-    def _create_grid(self):
-        grid = ExtObjectGrid(region='center')
-
-        for column in self.columns:
-            grid.add_column(**column)
-
-        return grid

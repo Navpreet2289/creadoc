@@ -7,7 +7,7 @@ from recordpack.provider import ObjectListProvider, DjangoModelProvider
 from recordpack.recordpack import BaseRecordListPack
 from creadoc.document.preprocessor import DocumentPreprocessor
 from creadoc.models import CreadocReport
-from creadoc.registry.registry import PackRegistry
+from creadoc.registry.pack import PackRegistry
 from demo.app.report_settings.forms import (
     ReportSettingsWindow, ReportSettingsEditWindow)
 
@@ -37,10 +37,10 @@ class ReportSettingsPack(BaseRecordListPack):
     def get_rows(self, request, context, query_object):
         result = []
 
-        for shortname, name in PackRegistry.items():
+        for shortname, registry_item in PackRegistry.instance().items():
             result.append({
-                'shortname': shortname,
-                'name': name,
+                'shortname': registry_item.shortname,
+                'name': registry_item.name,
             })
 
         return {

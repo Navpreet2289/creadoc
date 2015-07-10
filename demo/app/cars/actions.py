@@ -36,6 +36,14 @@ class CarActionPack(BaseRecordListPack):
         object_class=None,
     )
 
+    def get_list_window(self, request, context, is_select):
+        win = super(CarActionPack, self).get_list_window(
+            request, context, is_select)
+
+        win.bind_reports(self)
+
+        return win
+
 
 class CarActionPack2(BaseRecordListPack):
     u"""
@@ -49,3 +57,11 @@ class CarActionPack2(BaseRecordListPack):
         data_source=lambda: CAR_DATA,
         object_class=None,
     )
+
+    def get_list_window(self, request, context, is_select):
+        win = super(CarActionPack2, self).get_list_window(
+            request, context, is_select)
+
+        win.bind_reports(self)
+
+        return win

@@ -3,7 +3,8 @@ from m3.actions import ControllerCache
 from m3_ext.ui.app_ui import (
     DesktopLaunchGroup, DesktopShortcut,
     GENERIC_USER, DesktopLoader)
-from creadoc.registry.registry import PackRegistry, SourceRegistry
+from creadoc.registry.source import SourceRegistry
+from creadoc.registry.pack import PackRegistry
 from demo.app import controller
 from demo.app.cars.actions import CarActionPack, CarActionPack2
 from demo.app.cars.sources import CarSource
@@ -26,6 +27,11 @@ def register_desktop_menu():
             pack=ControllerCache.find_pack(CarActionPack),
             index=10
         ),
+        DesktopShortcut(
+            name=u'Второй список автомобилей',
+            pack=ControllerCache.find_pack(CarActionPack2),
+            index=20
+        ),
     ])
 
     DesktopLoader.add(
@@ -35,9 +41,9 @@ def register_desktop_menu():
     )
 
 
-PackRegistry.add(
+PackRegistry.instance().add(
     (CarActionPack, u'Реестр автомобилей'),
     (CarActionPack2, u'Второй реестр автомобилей'),
 )
 
-SourceRegistry.register(CarSource)
+SourceRegistry.instance().register(CarSource)
