@@ -1,12 +1,10 @@
 # coding: utf-8
 import datetime
-from creadoc.helper.cls import Singletone
 from creadoc.models import CreadocReport
 
 __author__ = 'damirazo <me@damirazo.ru>'
 
 
-@Singletone
 class PackRegistry(object):
     u"""
     Реестр паков, в которые возможно добавление печатных форм
@@ -14,25 +12,25 @@ class PackRegistry(object):
 
     _packs = {}
 
-    def add(self, *packs):
+    @classmethod
+    def add(cls, *packs):
+        u"""
+        Добавление списка паков для регистрации в реестре
+        """
         for params in packs:
             shortname = params[0].get_short_name()
             name = params[1]
 
-            param_window = None
-            if len(params) > 2:
-                param_window = params[2]
-
-            if shortname not in self._packs:
+            if shortname not in cls._packs:
                 item = PackRegistryItem(
                     shortname=shortname,
                     name=name,
-                    param_window=param_window,
                 )
-                self._packs[item.shortname] = item
+                cls._packs[item.shortname] = item
 
-    def items(self):
-        return self._packs.iteritems()
+    @classmethod
+    def items(cls):
+        return cls._packs.iteritems()
 
 
 class PackRegistryItem(object):
@@ -40,12 +38,11 @@ class PackRegistryItem(object):
     Элемент реестра паков
     """
 
-    __slots__ = ['shortname', 'name', 'param_window']
+    __slots__ = ['shortname', 'name']
 
-    def __init__(self, shortname, name, param_window=None):
+    def __init__(self, shortname, name):
         self.shortname = shortname
         self.name = name
-        self.param_window = param_window
 
     def reports(self, date=None):
         u"""

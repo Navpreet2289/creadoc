@@ -1,6 +1,7 @@
 # coding: utf-8
-from recordpack.provider import ObjectListProvider
+from recordpack.provider import ObjectListProvider, DjangoModelProvider
 from recordpack.recordpack import BaseRecordListPack
+from demo.app.cars.models import Car
 from demo.app.cars.ui import CarListWindow
 
 
@@ -31,9 +32,8 @@ class CarActionPack(BaseRecordListPack):
 
     list_window = CarListWindow
 
-    provider = ObjectListProvider(
-        data_source=lambda: CAR_DATA,
-        object_class=None,
+    provider = DjangoModelProvider(
+        data_source=Car,
     )
 
     def get_list_window(self, request, context, is_select):

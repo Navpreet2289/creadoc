@@ -1,6 +1,5 @@
 # coding: utf-8
 import datetime
-from operator import itemgetter
 from m3.actions import ACD, OperationResult
 from recordpack.be import BE
 from recordpack.provider import ObjectListProvider, DjangoModelProvider
@@ -37,7 +36,7 @@ class ReportSettingsPack(BaseRecordListPack):
     def get_rows(self, request, context, query_object):
         result = []
 
-        for shortname, registry_item in PackRegistry.instance().items():
+        for shortname, registry_item in PackRegistry.items():
             result.append({
                 'shortname': registry_item.shortname,
                 'name': registry_item.name,
@@ -81,7 +80,7 @@ class ReportSettingsRegisterPack(BaseRecordListPack):
         preprocessor = DocumentPreprocessor(request.FILES.get('file_template'))
         finded_tags = preprocessor.prepare()
 
-        has_errors = any(map(itemgetter(1), finded_tags.iteritems()))
+        has_errors = any(map(lambda x: not x[1], finded_tags.iteritems()))
 
         if not has_errors:
             return super(ReportSettingsRegisterPack, self).request_save(

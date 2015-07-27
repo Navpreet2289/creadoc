@@ -3,12 +3,10 @@ import abc
 from creadoc.exceptions import (
     SourceValidationException,
     SourceTagDuplicateException)
-from creadoc.helper.cls import Singletone
 
 __author__ = 'damirazo <me@damirazo.ru>'
 
 
-@Singletone
 class SourceRegistry(object):
     u"""
     Реестр источников данных
@@ -17,7 +15,8 @@ class SourceRegistry(object):
     # Зарегистрированные источники данных
     _data = {}
 
-    def register(self, source):
+    @classmethod
+    def register(cls, source):
         u"""
         Регистрация источника данных в реестре
         """
@@ -26,25 +25,30 @@ class SourceRegistry(object):
 
         tag = source.tag
 
-        if tag in self._data:
+        if tag in cls._data:
             raise SourceTagDuplicateException((
                 u'Тег {} уже используется в источнике данных {}'
-            ).format(tag, self._data[tag].__name__))
+            ).format(tag, cls._data[tag].__name__))
 
-        self._data[tag] = source
+        cls._data[tag] = source
 
-    def source_by_tag(self, tag):
+    @classmethod
+    def source_by_tag(cls, tag):
         u"""
         Поиск источника данных с указанным тегом
         """
-        return self._data.get(tag)
+        return cls._data.get(tag)
 
-    def sources(self):
+    @classmethod
+    def sources(cls):
         u"""
         Список всех зарегистрированных источников данных
         """
-        return self._data
+        return cls._data
 
+
+class SourceFiller(object):
+    pass
 
 
 class Source(object):
@@ -84,8 +88,10 @@ class Source(object):
 
     def data(self):
         u"""
+        Метод, возвращающий значение оконечного источника данных.
+        Оконечным считаются источники, не имеющие дочерних источников.
         """
-        raise NotImplementedError
+        pass
 
     @classmethod
     def check_children(cls, fields):
@@ -111,6 +117,10 @@ class Source(object):
 
 
 class AttributeSource(Source):
+    u"""
+    Источник данных, возвращающий значение атрибута
+    с указанным именем у родительского источника данных
+    """
 
     def __init__(self, attr_name):
         self.attr_name = attr_name

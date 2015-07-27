@@ -41,9 +41,9 @@ def register_desktop_menu():
     )
 
 
-PackRegistry.instance().add(
+PackRegistry.add(
     (CarActionPack, u'Реестр автомобилей'),
     (CarActionPack2, u'Второй реестр автомобилей'),
 )
 
-SourceRegistry.instance().register(CarSource)
+SourceRegistry.register(CarSource)

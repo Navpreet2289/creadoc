@@ -2,3 +2,4 @@
 *.sqlite3
 *.py[cod]
 demo/report_templates/*.docx
+.vagrant/*

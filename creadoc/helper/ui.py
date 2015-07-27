@@ -1,11 +1,18 @@
 # coding: utf-8
 import datetime
+from django.template import Context
+from django.template.loader import get_template
+from m3.actions.urls import get_pack_instance
 from m3_ext.ui.containers import (
     ExtContextMenu, ExtContextMenuItem,
     ExtToolbarMenu)
 from creadoc.models import CreadocReport
 
 __author__ = 'damirazo <me@damirazo.ru>'
+
+
+# Имя шаблона для обработчика кнопки печати
+BUILDER_TEMPLATE_NAME = 'ReportBuilder.js'
 
 
 def create_reports_button(pack, date=None):
@@ -33,6 +40,7 @@ def create_reports_button(pack, date=None):
     for report in reports:
         report_element = ExtContextMenuItem()
         report_element.text = report.name
+        report_element.handler = build_handler(report)
 
         report_menu.items.append(report_element)
 
@@ -63,3 +71,18 @@ def bind_reports_to_grid(grid, pack, date=None):
     top_bar = grid.top_bar
     top_bar.add_separator()
     top_bar.items.append(button)
+
+
+def build_handler(report):
+    u"""
+    Формирование обработчика клика по кнопке печати
+    """
+    context = Context({
+        'url': get_pack_instance(
+            'CreaDocActionPack'
+        ).action_build.get_absolute_url(),
+        'report_id': report.id,
+    })
+    template = get_template(BUILDER_TEMPLATE_NAME)
+
+    return template.render(context)

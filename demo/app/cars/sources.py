@@ -5,11 +5,7 @@ __author__ = 'damirazo <me@damirazo.ru>'
 
 
 class CarSource(Source):
-
     tag = u'Автомобиль'
     fields = {
-        u'Наименование': AttributeSource('name'),
+        u'Наименование': AttributeSource('marka'),
     }
-
-    def data(self):
-        pass
