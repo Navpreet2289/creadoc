@@ -1,6 +1,9 @@
 # coding: utf-8
-from m3.actions import ActionPack, ACD
+from m3.actions import ActionPack, ACD, OperationResult
 from recordpack.helpers import make_action
+from creadoc.api import get_report_by_id
+from creadoc.document.builder import CreaDocBuilder
+from creadoc.document.filler import CreaDocFiller
 
 __author__ = 'damirazo <me@damirazo.ru>'
 
@@ -9,7 +12,7 @@ class CreaDocActionPack(ActionPack):
     u"""
     Формирование печатной формы
     """
-    url = '/creadoc'
+    url = '/report'
 
     def __init__(self):
         super(CreaDocActionPack, self).__init__()
@@ -20,10 +23,22 @@ class CreaDocActionPack(ActionPack):
             acd=self._action_context_build,
         )
 
+        self.actions.extend([
+            self.action_build,
+        ])
+
     def _action_context_build(self):
         return [
-            ACD(name='shortname', type=unicode, required=True),
+            ACD(name='report_id', type=int, required=True,
+                verbose_name=u'Идентификатор ПФ'),
         ]
 
     def request_build(self, request, context):
-        pass
+        report = get_report_by_id(context.report_id)
+
+        builder = CreaDocBuilder(report)
+        filler = CreaDocFiller(context)
+        document = builder.build(filler)
+        result = document.save()
+
+        return OperationResult(result)

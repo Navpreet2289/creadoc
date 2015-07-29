@@ -1,9 +1,45 @@
 # coding: utf-8
-import re
-from operator import attrgetter
-from docx import Document
+import os
+from creadoc.document.formats.wrapper_docx import DocxCreaDocFormatWrapper
+from creadoc.exceptions import DocumentWrapperDoesNotExist
 
 __author__ = 'damirazo <me@damirazo.ru>'
+
+
+class CreaDocWrapperFabric(object):
+    u"""
+    Фабрика, возвращающая готовую обертку для указанного типа файла
+    """
+
+    _wrappers = {
+        'docx': DocxCreaDocFormatWrapper,
+    }
+
+    @classmethod
+    def register_wrapper(cls, extension, wrapper_cls):
+        u"""
+        Регистрация новой обертки для указанного расширения
+        При использовании уже зарегистрированного расширения
+        существует возможность перезаписать обертку
+        """
+        cls._wrappers[extension] = wrapper_cls
+
+    @classmethod
+    def wrapper(cls, path):
+        u"""
+        Возвращает инстанцированный объект класса-обертки
+        """
+        if not isinstance(path, basestring):
+            extension = os.path.splitext(path.name)[-1].replace('.', '')
+        else:
+            extension = os.path.splitext(path)[-1].replace('.', '')
+
+        if extension in cls._wrappers:
+            wrapper_cls = cls._wrappers[extension]
+
+            return wrapper_cls(path)
+
+        raise DocumentWrapperDoesNotExist
 
 
 class CreaDoc(object):
@@ -11,42 +47,12 @@ class CreaDoc(object):
     Объектное представление шаблона печатной формы
     """
 
-    # Паттерн для поиска тегов в шаблоне
-    tags_pattern = re.compile(
-        '{{\s*([\w\d\.а-яА-ЯйЙёЁ]+?)\s*}}', re.I | re.U)
-
-    def __init__(self, path):
+    def __init__(self, path_or_file):
         u"""
-        :param path: Путь до шаблона
+        :param path_or_file: Путь до шаблона или файловый дескриптор
         """
-        self.path = path
-        self.document = Document(self.path)
-
-    @property
-    def paragraphs(self):
-        u"""
-        Список параграфов внутри документа
-        """
-        result = []
-
-        for paragraph in self.document.paragraphs:
-            result.append(u''.join(map(attrgetter('text'), paragraph.runs)))
-
-        return result
-
-    @property
-    def full_text(self):
-        u"""
-        Полный текст документа
-        """
-        return u'\n'.join(self.paragraphs)
-
-    @property
-    def tags(self):
-        u"""
-        Список тегов внутри документа
-        """
-        return self.tags_pattern.findall(self.full_text)
+        self.path = path_or_file
+        self.wrapper = CreaDocWrapperFabric.wrapper(self.path)
 
     def save(self, path=None):
-        return self.document.save(path or self.path)
+        return self.wrapper.save(path or self.path)

@@ -18,3 +18,9 @@ class SourceValidationException(CreaDocException):
     u"""
     Ошибка при валидации источника данных
     """
+
+
+class DocumentWrapperDoesNotExist(CreaDocException):
+    u"""
+    Отсутствует подходящий обработчик для файла с указанным расширением
+    """

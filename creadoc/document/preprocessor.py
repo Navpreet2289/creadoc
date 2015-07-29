@@ -40,7 +40,7 @@ class DocumentPreprocessor(object):
         По умолчанию управление отдается лишь тем источникам данных,
         что имеют потомков.
         """
-        tags = self.document.tags
+        tags = self.document.wrapper.tags
 
         result = {}
 
