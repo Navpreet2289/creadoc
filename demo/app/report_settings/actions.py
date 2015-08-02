@@ -5,7 +5,7 @@ from m3.actions import ACD, OperationResult
 from recordpack.be import BE
 from recordpack.provider import ObjectListProvider, DjangoModelProvider
 from recordpack.recordpack import BaseRecordListPack
-from creadoc.document.preprocessor import DocumentPreprocessor
+from creadoc.report.preprocessor import DocumentPreprocessor
 from creadoc.models import CreadocReport
 from creadoc.registry.pack import PackRegistry
 from demo.app.report_settings.forms import (

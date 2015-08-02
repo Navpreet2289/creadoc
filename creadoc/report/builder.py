@@ -1,5 +1,5 @@
 # coding: utf-8
-from creadoc.document.document import CreaDoc
+from creadoc.report.document import CreaDoc
 
 __author__ = 'damirazo <me@damirazo.ru>'
 
@@ -14,6 +14,7 @@ class CreaDocBuilder(object):
         self.path = self.report.template.path
         self.document = CreaDoc(self.path)
 
-    def build(self, filler):
+    def build(self, mapper):
         available_tags = self.document.wrapper.tags
+        self.document.wrapper._normalize_runs()
         pass

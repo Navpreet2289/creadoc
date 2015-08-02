@@ -1,6 +1,6 @@
 # coding: utf-8
 import os
-from creadoc.document.formats.wrapper_docx import DocxCreaDocFormatWrapper
+from creadoc.report.formats.wrapper_docx import DocxCreaDocFormatWrapper
 from creadoc.exceptions import DocumentWrapperDoesNotExist
 
 __author__ = 'damirazo <me@damirazo.ru>'
@@ -11,6 +11,7 @@ class CreaDocWrapperFabric(object):
     Фабрика, возвращающая готовую обертку для указанного типа файла
     """
 
+    # Соответствие расширения файла и класса-обертки для данного файла
     _wrappers = {
         'docx': DocxCreaDocFormatWrapper,
     }

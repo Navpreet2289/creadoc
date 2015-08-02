@@ -1,5 +1,5 @@
 # coding: utf-8
-from creadoc.document.document import CreaDoc
+from creadoc.report.document import CreaDoc
 from creadoc.exceptions import SourceValidationException
 from creadoc.registry.source import SourceRegistry
 
@@ -44,7 +44,7 @@ class DocumentPreprocessor(object):
 
         result = {}
 
-        for tag in tags:
+        for tag, modifier, _ in tags:
             segments = tag.split('.')
             root_tag = segments[0]
 

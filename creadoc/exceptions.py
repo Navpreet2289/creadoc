@@ -24,3 +24,9 @@ class DocumentWrapperDoesNotExist(CreaDocException):
     u"""
     Отсутствует подходящий обработчик для файла с указанным расширением
     """
+
+
+class SourceCanNotBeFilled(CreaDocException):
+    u"""
+    Не удалось заполнить источник данных
+    """

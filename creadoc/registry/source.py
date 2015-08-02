@@ -65,6 +65,19 @@ class Source(object):
     fields = None
     # Ссылка на родительский источник данных
     parent = None
+    # Наименование параметра контекста,
+    # на основе которого будет заполнятся данный источник данных.
+    # Имеет смысл только для источников верхнего уровня.
+    context_name = None
+    # Инициирующее значение, заданное классом-заполнителем,
+    # на основе которой формируется значение источника данных
+    initial_value = None
+
+    def fill(self, initial_value=None):
+        u"""
+        Заполнение инициирующего значения
+        """
+        self.initial_value = initial_value
 
     def harvest_data(self, parent=None):
         u"""
@@ -79,8 +92,8 @@ class Source(object):
         self.parent = parent
 
         if self.fields is not None:
-            for tag_name, source in self.fields.iteritems():
-                result[tag_name] = source.harvest_data(self)
+            for source in self.fields:
+                result[source.tag] = source.harvest_data(self)
         else:
             result = self.data()
 
@@ -88,10 +101,9 @@ class Source(object):
 
     def data(self):
         u"""
-        Метод, возвращающий значение оконечного источника данных.
-        Оконечным считаются источники, не имеющие дочерних источников.
+        Метод, возвращающий значение источника данных
         """
-        pass
+        raise NotImplementedError
 
     @classmethod
     def check_children(cls, fields):
@@ -122,8 +134,9 @@ class AttributeSource(Source):
     с указанным именем у родительского источника данных
     """
 
-    def __init__(self, attr_name):
+    def __init__(self, tag_name, attr_name):
+        self.tag = tag_name
         self.attr_name = attr_name
 
     def data(self):
-        return getattr(self.parent, self.attr_name, '')
+        return getattr(self.parent.data(), self.attr_name, '')

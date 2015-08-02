@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object pk="1" model="cars.car">
+        <field type="CharField" name="marka">Тест 1</field>
+        <field type="CharField" name="seria">т110</field>
+        <field type="IntegerField" name="year">2014</field>
+    </object>
+    <object pk="2" model="cars.car">
+        <field type="CharField" name="marka">Тест 2</field>
+        <field type="CharField" name="seria">т110</field>
+        <field type="IntegerField" name="year">2015</field>
+    </object>
+    <object pk="3" model="cars.car">
+        <field type="CharField" name="marka">Тест 3</field>
+        <field type="CharField" name="seria">т110</field>
+        <field type="IntegerField" name="year">2016</field>
+    </object>
+</django-objects>

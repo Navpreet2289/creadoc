@@ -30,6 +30,8 @@ class CarActionPack(BaseRecordListPack):
     """
     url = '/car'
 
+    allow_add = allow_edit = allow_delete = False
+
     list_window = CarListWindow
 
     provider = DjangoModelProvider(
@@ -50,6 +52,8 @@ class CarActionPack2(BaseRecordListPack):
     Пак для реестра со списком автомобилей
     """
     url = '/car2'
+
+    allow_add = allow_edit = allow_delete = False
 
     list_window = CarListWindow
 
