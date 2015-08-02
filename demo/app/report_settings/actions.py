@@ -1,5 +1,6 @@
 # coding: utf-8
 import datetime
+from django.core.files import File
 from m3.actions import ACD, OperationResult
 from recordpack.be import BE
 from recordpack.provider import ObjectListProvider, DjangoModelProvider
@@ -96,6 +97,14 @@ class ReportSettingsRegisterPack(BaseRecordListPack):
                     u'<br>'.join(error_tags),
                 )
             )
+
+    def save_row(self, request, context, record, is_new):
+        if is_new:
+            file_template = request.FILES['file_template']
+            record.template = File(file_template)
+
+        return super(ReportSettingsRegisterPack, self).save_row(
+            request, context, record, is_new)
 
     def get_query_object(self, request, context):
         query_object = super(
