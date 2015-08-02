@@ -2,7 +2,8 @@
 from m3.actions import ControllerCache
 from m3_ext.ui.app_ui import (
     DesktopLaunchGroup, DesktopShortcut,
-    GENERIC_USER, DesktopLoader)
+    DesktopLoader)
+from m3_users import GENERIC_USER, metaroles
 from creadoc.registry.source import SourceRegistry
 from creadoc.registry.pack import PackRegistry
 from demo.app import controller
@@ -18,7 +19,8 @@ def register_actions():
 
 
 def register_desktop_menu():
-    metarole = GENERIC_USER
+    generic_metarole = metaroles.get_metarole(GENERIC_USER)
+
     registers = DesktopLaunchGroup(name=u'Список реестров', index=10)
 
     registers.subitems.extend([
@@ -35,7 +37,7 @@ def register_desktop_menu():
     ])
 
     DesktopLoader.add(
-        metarole=metarole,
+        metarole=generic_metarole,
         place=DesktopLoader.TOPTOOLBAR,
         element=registers,
     )

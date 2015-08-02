@@ -2,7 +2,8 @@
 from m3.actions import ControllerCache
 from m3_ext.ui.app_ui import (
     DesktopShortcut, DesktopLaunchGroup,
-    DesktopLoader, GENERIC_USER)
+    DesktopLoader)
+from m3_users import metaroles, GENERIC_USER
 from demo.app import controller
 from demo.app.report_settings.actions import (
     ReportSettingsPack, ReportSettingsRegisterPack)
@@ -18,7 +19,8 @@ def register_actions():
 
 
 def register_desktop_menu():
-    metarole = GENERIC_USER
+    generic_metarole = metaroles.get_metarole(GENERIC_USER)
+
     administrations = DesktopLaunchGroup(name=u'Администрирование', index=20)
 
     administrations.subitems.extend([
@@ -30,7 +32,7 @@ def register_desktop_menu():
     ])
 
     DesktopLoader.add(
-        metarole=metarole,
+        metarole=generic_metarole,
         place=DesktopLoader.TOPTOOLBAR,
         element=administrations,
     )
