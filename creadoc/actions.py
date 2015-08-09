@@ -1,7 +1,8 @@
 # coding: utf-8
-from m3.actions import ActionPack, ACD, OperationResult
+from m3.actions import ActionPack, ACD
 from recordpack.helpers import make_action
 from creadoc.api import get_report_by_id
+from creadoc.helper.result import IFrameDownloadResult
 from creadoc.report.builder import CreaDocBuilder
 from creadoc.report.mapper import CreaDocMapper
 
@@ -46,6 +47,6 @@ class CreaDocActionPack(ActionPack):
         # Формируем документ и заполняем его
         document = builder.build()
         # Сохраняем результат сборки
-        result = document.save()
+        url = document.save()
 
-        return OperationResult(result)
+        return IFrameDownloadResult(file_url=url)

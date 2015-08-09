@@ -1,5 +1,6 @@
 .idea/*
 *.sqlite3
 *.py[cod]
-demo/report_templates/*.docx
+demo/media/*.docx
+demo/media/report_templates/*.docx
 .vagrant/*

@@ -60,3 +60,6 @@ TEMPLATE_DIRS = (
 STATICFILES_DIRS = (
     os.path.join(M3_EXT_ROOT, 'static'),
 )
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'demo', 'media')
+MEDIA_URL = '/downloads/'

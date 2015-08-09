@@ -45,7 +45,19 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
         u"""
         Сохранение документа
         """
-        pass
+        self.document.save(path)
+
+    def replace_tags(self, params):
+        u"""
+        Замена тегов на указанные эквиваленты в шаблоне
+        """
+        for paragraph in self.document.paragraphs:
+            for run in paragraph.runs:
+                if RE_TAG_TEMPLATE.match(run.text):
+                    tag_name = RE_TAG_TEMPLATE.findall(run.text)[0][0]
+                    value = params.get(tag_name, '')
+
+                    run.text = value
 
     def normalize(self):
         u"""
@@ -169,4 +181,5 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
             start_run.text = text
 
             for x in xrange(start + 1, end + 1):
-                del paragraph.runs[x]
+                # del paragraph.runs[x]
+                paragraph.runs[x].text = ''

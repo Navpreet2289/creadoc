@@ -47,10 +47,6 @@ class SourceRegistry(object):
         return cls._data
 
 
-class SourceFiller(object):
-    pass
-
-
 class Source(object):
     u"""
     Абстрактный класс источника данных

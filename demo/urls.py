@@ -11,7 +11,7 @@ handler500 = 'm3.helpers.logger.catch_error_500'
 urlpatterns = patterns(
     '',
     (
-        r'^static/(?P<path>.*)$',
+        r'^downloads/(?P<path>.*)$',
         'django.views.static.serve',
         {'document_root': settings.MEDIA_ROOT}
     ),

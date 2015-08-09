@@ -29,11 +29,23 @@ class CreaDocFormatWrapper(object):
         """
         raise NotImplementedError
 
+    def replace_tags(self, params):
+        u"""
+        Замена тегов на соответствующие значения из словаря
+        """
+        raise NotImplementedError
+
     def sources(self):
         u"""
         Список всех источников данных верхнего уровня, доступных в документе
         """
-        pass
+        raise NotImplementedError
+
+    def normalize(self):
+        u"""
+        "Нормализация" документа и приведение его к определенному состоянию
+        """
+        raise NotImplementedError
 
     def save(self, path):
         u"""

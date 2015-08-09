@@ -17,6 +17,9 @@
         'report_id': reportId
     };
 
+    // Если требуется выделение записи,
+    // то проверяем факт наличия выделения
+    // и дополняем параметры идентификатором выделенной записи
     if (needSelection) {
         var sm = grid.getSelectionModel();
 
@@ -31,7 +34,7 @@
         url: reportBuildUrl,
         params: params,
         success: function(response) {
-            debugger;
+            smart_eval(response.responseText);
         },
         failure: uiAjaxFailMessage
     };

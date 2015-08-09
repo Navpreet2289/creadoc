@@ -16,22 +16,38 @@ class CreaDocBuilder(object):
         self.mapper = mapper
 
     def build(self):
+        u"""
+        Сборка печатной формы
+        """
+        # Нормализация документа
         self.document.wrapper.normalize()
 
+        # Обработка обычных тегов
         self.prepare_tags()
+        # Обработка списочных тегов
         self.prepare_cycles()
 
+        return self.document
+
     def prepare_tags(self):
+        u"""
+        Обработка обычных тегов
+        """
+        to_replace = {}
         values = self.mapper.fill(self.document.wrapper.sources())
 
-        for joined_tag in self.document.wrapper.tags():
-            segments = joined_tag[0].split('.')
-            root_tag = segments[0]
-
+        for tag_data in self.document.wrapper.tags():
+            tag_name = tag_data[0]
+            segments = tag_name.split('.')
             value = self.get_by_key(values, segments)
-            pass
+            to_replace[tag_name] = value or ''
+
+        self.document.wrapper.replace_tags(to_replace)
 
     def prepare_cycles(self):
+        u"""
+        Обработка списочных тегов
+        """
         for cycle in self.document.wrapper.cycles():
             pass
 
