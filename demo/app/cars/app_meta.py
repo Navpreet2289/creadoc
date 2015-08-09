@@ -8,7 +8,7 @@ from creadoc.registry.source import SourceRegistry
 from creadoc.registry.pack import PackRegistry
 from demo.app import controller
 from demo.app.cars.actions import CarActionPack, CarActionPack2
-from demo.app.cars.sources import CarSource
+from demo.app.cars.sources import CarSource, VacationListSource
 
 
 def register_actions():
@@ -49,3 +49,4 @@ PackRegistry.add(
 )
 
 SourceRegistry.register(CarSource())
+SourceRegistry.register(VacationListSource())

@@ -1,4 +1,5 @@
 # coding: utf-8
+from creadoc.registry.source import SourceRegistry
 from creadoc.report.document import CreaDoc
 
 __author__ = 'damirazo <me@damirazo.ru>'
@@ -48,8 +49,7 @@ class CreaDocBuilder(object):
         u"""
         Обработка списочных тегов
         """
-        for cycle in self.document.wrapper.cycles():
-            pass
+        self.document.wrapper.prepare_cycles()
 
     def get_by_key(self, data, path):
         u"""

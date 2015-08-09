@@ -1,6 +1,8 @@
 # coding: utf-8
+from copy import copy, deepcopy
 from operator import attrgetter
 from docx import Document
+from creadoc.enums import SourceType
 from creadoc.exceptions import CreaDocException
 from creadoc.registry.source import SourceRegistry
 from creadoc.report.constants import (
@@ -44,6 +46,13 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
 
         return tags
 
+    def has_tag(self, tag_name):
+        for tag, modifier, _ in self.tags():
+            if tag == tag_name:
+                return True
+
+        return False
+
     def sources(self):
         u"""
         Список источников данных верхнего уровня
@@ -73,9 +82,58 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
             for run in paragraph.runs:
                 if RE_TAG_TEMPLATE.match(run.text):
                     tag_name = RE_TAG_TEMPLATE.findall(run.text)[0][0]
-                    value = params.get(tag_name, '')
 
-                    run.text = value
+                    if not self.has_tag(tag_name):
+                        continue
+
+                    run.text = params.get(tag_name, '')
+
+    def prepare_cycles(self):
+        global_shift_index = 0
+
+        def index(num):
+            return num + global_shift_index
+
+        for cycle in self.cycles():
+            tag, inner_tag = cycle['params'][0]
+
+            begin_paragraph = index(cycle['begin_paragraph'])
+            end_paragraph = index(cycle['end_paragraph'])
+            begin_run = cycle['begin_run']
+            end_run = cycle['end_run']
+
+            source = SourceRegistry.source_by_tag(tag)
+
+            if source.type != SourceType.LIST:
+                raise CreaDocException(
+                    u'"{}" не является списочным тегом!'.format(source.tag))
+
+            paragraphs = self.document.paragraphs[
+                begin_paragraph + 1: end_paragraph
+            ]
+
+            _p = []
+
+            for i, paragraph in enumerate(paragraphs, start=begin_paragraph + 1):
+                _p.append(deepcopy(paragraph))
+
+            rows = source.harvest_data()
+            end_of_block = self.document.paragraphs[end_paragraph - 1]
+
+            for i, row in enumerate(rows, start=1):
+                # Для первой итерации нет необходимости
+                # производить вставку параграфов
+                if i == 1:
+                    pass
+                else:
+                    prev_p = end_of_block
+                    for p in _p:
+                        prev_p._p.addnext(p._p)
+                        prev_p = p
+
+                        global_shift_index += 1
+
+                pass
 
     def normalize(self):
         u"""
@@ -95,6 +153,7 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
         u"""
         Получение информации о наличии блоков с циклами в документе
         """
+        # TODO: Не находит теги, перенесенные в другие параграфы
         params = []
         cycle_block_started = False
         current_tag = {}

@@ -1,5 +1,6 @@
 # coding: utf-8
 import abc
+from creadoc.enums import SourceType
 from creadoc.exceptions import (
     SourceValidationException,
     SourceTagDuplicateException)
@@ -68,6 +69,8 @@ class Source(object):
     # Инициирующее значение, заданное классом-заполнителем,
     # на основе которой формируется значение источника данных
     initial_value = None
+    # Тип источника данных (обычный/списочный)
+    type = SourceType.SINGLE
 
     def fill(self, initial_value=None):
         u"""
