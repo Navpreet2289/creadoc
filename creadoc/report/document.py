@@ -55,7 +55,8 @@ class CreaDoc(object):
         self.name = self.file_name()
         self.extension = self.file_extension()
 
-        self.wrapper = CreaDocWrapperFabric.wrapper(self.path, self.extension)
+        self.wrapper = CreaDocWrapperFabric.wrapper(
+            self._base_path, self.extension)
 
     def file_path(self):
         u"""
@@ -69,13 +70,13 @@ class CreaDoc(object):
         u"""
         Наименование файла
         """
-        return os.path.basename(self._base_path).split('.')[0]
+        return os.path.basename(self.path).split('.')[0]
 
     def file_extension(self):
         u"""
         Расширение файла
         """
-        return os.path.splitext(self._base_path)[-1].replace('.', '')
+        return os.path.splitext(self.path)[-1].replace('.', '')
 
     def download_url(self, name):
         u"""

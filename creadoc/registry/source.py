@@ -116,12 +116,23 @@ class Source(object):
 
         # Проверяем что указанный потомок есть в списке потомков
         # данного источника
-        elif cls.fields and checked_field not in cls.fields:
+        elif cls.fields and not cls.has_children(checked_field):
             raise SourceValidationException
 
         # Проверяем, что еще остались потомки
         elif children_fields:
             cls.fields[checked_field].check_children(children_fields)
+
+    @classmethod
+    def has_children(cls, tag):
+        u"""
+        Проверка наличия потомка с указанным именем
+        """
+        for field in cls.fields:
+            if field.tag == tag:
+                return True
+
+        return False
 
 
 class AttributeSource(Source):

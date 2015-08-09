@@ -25,6 +25,9 @@ class DocumentPreprocessor(object):
         """
         # Этапы обработки
 
+        # Нормализация документа
+        self.document.wrapper.normalize()
+
         # 1. Анализ обнаруженных внутри документа тегов
         allowed_tags = self.check_tags()
 

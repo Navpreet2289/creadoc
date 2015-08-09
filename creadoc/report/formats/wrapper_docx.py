@@ -23,8 +23,26 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
     def tags(self):
         u"""
         Список тегов внутри документа
+        Теги, находящиеся внутри блока цикла являются динамическими
+        и не возвращаются данным методом
         """
-        return RE_TAG_TEMPLATE.findall(self._full_text())
+        tags = []
+        block_started = False
+
+        for paragraph in self.document.paragraphs:
+            for run in paragraph.runs:
+                if RE_START_CYCLE_TEMPLATE.match(run.text):
+                    block_started = True
+
+                if RE_END_CYCLE_TEMPLATE.match(run.text):
+                    block_started = False
+
+                # Учитываем только теги,
+                # которые находятся за пределами блока цикла
+                if not block_started and RE_TAG_TEMPLATE.match(run.text):
+                    tags.append(RE_TAG_TEMPLATE.findall(run.text)[0])
+
+        return tags
 
     def sources(self):
         u"""
