@@ -33,7 +33,7 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
         result = {}
 
         for joined_tags in self.tags():
-            segments = joined_tags.split('.')
+            segments = joined_tags[0].split('.')
             root_tag = segments[0]
 
             source = SourceRegistry.source_by_tag(root_tag)

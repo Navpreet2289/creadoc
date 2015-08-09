@@ -5,7 +5,7 @@ from m3_ext.ui.controls import ExtButton
 from m3_ext.ui.panels import ExtObjectGrid
 from m3_ext.ui.windows import ExtEditWindow, ExtWindow
 
-from creadoc.helper.ui import bind_reports_to_grid
+from creadoc.helper.form import bind_reports_to_grid
 
 __author__ = 'damirazo <me@damirazo.ru>'
 

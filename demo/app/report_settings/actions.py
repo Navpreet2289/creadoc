@@ -67,18 +67,26 @@ class ReportSettingsRegisterPack(BaseRecordListPack):
     master_is_foreignkey = False
     context_master_id = 'shortname'
     context_master_type = str
+    context_id = 'report_id'
 
     def _get_save_action_context_declaration(self):
         return [
-            ACD(name='id', type=int, required=True),
+            ACD(name=self.context_id, type=int, required=True),
             ACD(name='name', type=unicode, required=True),
             ACD(name='shortname', type=unicode, required=True),
             ACD(name='begin', type=datetime.date, required=False),
             ACD(name='end', type=datetime.date, required=False),
+            ACD(name='need_selection', type=bool, required=True, default=False),
         ]
 
     def request_save(self, request, context):
-        preprocessor = DocumentPreprocessor(request.FILES.get('file_template'))
+        template = request.FILES.get('file_template')
+        if template is None and hasattr(context, self.context_id):
+            row = self.get_row(
+                request, context, getattr(context, self.context_id))
+            template = row.template.file
+
+        preprocessor = DocumentPreprocessor(template)
         finded_tags = preprocessor.prepare()
 
         # has_errors = any(map(lambda x: not x[1], finded_tags.iteritems()))
@@ -101,8 +109,8 @@ class ReportSettingsRegisterPack(BaseRecordListPack):
 
     def save_row(self, request, context, record, is_new):
         if is_new:
-            file_template = request.FILES['file_template']
-            record.template = File(file_template)
+            template = request.FILES['file_template']
+            record.template = File(template)
 
         return super(ReportSettingsRegisterPack, self).save_row(
             request, context, record, is_new)

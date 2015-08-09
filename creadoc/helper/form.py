@@ -15,11 +15,12 @@ __author__ = 'damirazo <me@damirazo.ru>'
 BUILDER_TEMPLATE_NAME = 'ReportBuilder.js'
 
 
-def create_reports_button(pack, date=None):
+def create_reports_button(grid, pack, date=None):
     u"""
     Формирование контекстного меню
     со списком доступных для указанного пака печатных форм.
 
+    :param ExtObjectGrid grid: Объект грида, в который происходит добавление ПФ
     :param ActionPack pack: Инстанс пака, для которого осуществляется поиск ПФ
     :param date or None date: Дата, для которой производится поиск
         актуальных ПФ (по умолчанию текущая дата)
@@ -40,7 +41,7 @@ def create_reports_button(pack, date=None):
     for report in reports:
         report_element = ExtContextMenuItem()
         report_element.text = report.name
-        report_element.handler = build_handler(report)
+        report_element.handler = build_handler(report, grid.client_id)
 
         report_menu.items.append(report_element)
 
@@ -66,14 +67,14 @@ def bind_reports_to_grid(grid, pack, date=None):
     if date is None:
         date = datetime.date.today()
 
-    button = create_reports_button(pack, date)
+    button = create_reports_button(grid, pack, date)
 
     top_bar = grid.top_bar
     top_bar.add_separator()
     top_bar.items.append(button)
 
 
-def build_handler(report):
+def build_handler(report, grid_id):
     u"""
     Формирование обработчика клика по кнопке печати
     """
@@ -82,6 +83,8 @@ def build_handler(report):
             'CreaDocActionPack'
         ).action_build.get_absolute_url(),
         'report_id': report.id,
+        'need_selected': report.need_selected,
+        'grid_id': grid_id,
     })
     template = get_template(BUILDER_TEMPLATE_NAME)
 

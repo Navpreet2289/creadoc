@@ -21,7 +21,7 @@ class CreaDocMapper(object):
         """
         result = {}
 
-        for source in sources:
+        for tag, source in sources.iteritems():
             context_name = source.context_name
 
             if context_name is not None:

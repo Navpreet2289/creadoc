@@ -48,4 +48,4 @@ PackRegistry.add(
     (CarActionPack2, u'Второй реестр автомобилей'),
 )
 
-SourceRegistry.register(CarSource)
+SourceRegistry.register(CarSource())

@@ -31,6 +31,8 @@ class CreaDocActionPack(ActionPack):
         return [
             ACD(name='report_id', type=int, required=True,
                 verbose_name=u'Идентификатор ПФ'),
+            ACD(name='row_id', type=int, required=False,
+                verbose_name=u'Идентификатор выделенной записи')
         ]
 
     def request_build(self, request, context):

@@ -1,5 +1,6 @@
 # coding: utf-8
-from m3_ext.ui.fields import ExtStringField, ExtFileUploadField, ExtDateField
+from m3_ext.ui.fields import ExtStringField, ExtFileUploadField, ExtDateField, \
+    ExtCheckBox
 from m3_ext.ui.misc import ExtDataStore
 from m3_ext.ui.misc.store import ExtJsonReader
 from m3_ext.ui.panels import ExtObjectGrid
@@ -98,7 +99,7 @@ class ReportSettingsEditWindow(BaseEditWindow):
             self.title = u'Редактирование печатной формы'
 
         self.width = 360
-        self.height = 200
+        self.height = 230
 
         self.label_width = 130
 
@@ -129,6 +130,11 @@ class ReportSettingsEditWindow(BaseEditWindow):
         self.field_end.format = 'd.m.Y'
         self.field_end.anchor = '100%'
 
+        self.field_need_selection = ExtCheckBox()
+        self.field_need_selection.name = 'need_selected'
+        self.field_need_selection.box_label = u'Требуется ли выделение записи?'
+        self.field_need_selection.anchor = '100%'
+
         self.form.file_upload = True
 
         self.form.items.extend([
@@ -136,6 +142,7 @@ class ReportSettingsEditWindow(BaseEditWindow):
             self.field_template,
             self.field_begin,
             self.field_end,
+            self.field_need_selection,
         ])
 
 

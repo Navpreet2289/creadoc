@@ -13,6 +13,7 @@ class CarSource(Source):
     fields = [
         AttributeSource(u'Наименование', 'marka'),
     ]
+    context_name = 'row_id'
 
     def data(self):
         return Car.objects.get(pk=self.initial_value)

@@ -22,8 +22,25 @@ class CreaDocBuilder(object):
         self.prepare_cycles()
 
     def prepare_tags(self):
-        pass
+        values = self.mapper.fill(self.document.wrapper.sources())
+
+        for joined_tag in self.document.wrapper.tags():
+            segments = joined_tag[0].split('.')
+            root_tag = segments[0]
+
+            value = self.get_by_key(values, segments)
+            pass
 
     def prepare_cycles(self):
         for cycle in self.document.wrapper.cycles():
             pass
+
+    def get_by_key(self, data, path):
+        u"""
+        Возвращает значение с указанным ключем
+        """
+        result = reduce(
+            lambda dct, k: dct and dct.get(k) or None,
+            path, data)
+
+        return result

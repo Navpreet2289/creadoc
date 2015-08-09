@@ -20,7 +20,7 @@ class SourceRegistry(object):
         u"""
         Регистрация источника данных в реестре
         """
-        assert issubclass(source, Source), (
+        assert isinstance(source, Source), (
             u'Источник данных должен являться потомком класса Source')
 
         tag = source.tag

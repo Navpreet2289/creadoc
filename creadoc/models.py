@@ -28,6 +28,9 @@ class CreadocReport(models.Model):
     end = models.DateField(
         default=datetime.date.max,
         verbose_name=u'Дата окончания действия печатной формы')
+    need_selected = models.BooleanField(
+        default=False,
+        verbose_name=u'Требуется ли выделять запись в гриде для печати')
 
     class Meta:
         db_table = 'creadoc_report'

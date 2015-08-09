@@ -2,7 +2,7 @@
 from recordpack.provider import ObjectListProvider, DjangoModelProvider
 from recordpack.recordpack import BaseRecordListPack
 from demo.app.cars.models import Car
-from demo.app.cars.ui import CarListWindow
+from demo.app.cars.forms import CarListWindow
 
 
 CAR_DATA = [
@@ -33,6 +33,7 @@ class CarActionPack(BaseRecordListPack):
     allow_add = allow_edit = allow_delete = False
 
     list_window = CarListWindow
+    context_id = 'car_id'
 
     provider = DjangoModelProvider(
         data_source=Car,
