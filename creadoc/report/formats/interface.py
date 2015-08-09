@@ -7,10 +7,6 @@ __author__ = 'damirazo <me@damirazo.ru>'
 class CreaDocFormatWrapper(object):
     u"""
     Интерфейс для класса-обертки документа
-
-    "Цикл жизни" класса:
-    wrapper = CustomCreaDocFormatWrapper(path='/some/path')
-
     """
 
     __metaclass__ = abc.ABCMeta
@@ -33,11 +29,14 @@ class CreaDocFormatWrapper(object):
         """
         raise NotImplementedError
 
-    def replace_tags(self, params):
+    def sources(self):
         u"""
-        Замена всех тегов на доступные им значения
+        Список всех источников данных верхнего уровня, доступных в документе
         """
-        raise NotImplementedError
+        pass
 
     def save(self, path):
+        u"""
+        Сохранение документа
+        """
         raise NotImplementedError

@@ -9,12 +9,21 @@ class CreaDocBuilder(object):
     Сборщик печатной формы
     """
 
-    def __init__(self, report):
+    def __init__(self, report, mapper):
         self.report = report
         self.path = self.report.template.path
         self.document = CreaDoc(self.path)
+        self.mapper = mapper
 
-    def build(self, mapper):
-        available_tags = self.document.wrapper.tags
-        self.document.wrapper._normalize_runs()
+    def build(self):
+        self.document.wrapper.normalize()
+
+        self.prepare_tags()
+        self.prepare_cycles()
+
+    def prepare_tags(self):
         pass
+
+    def prepare_cycles(self):
+        for cycle in self.document.wrapper.cycles():
+            pass

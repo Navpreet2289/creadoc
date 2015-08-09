@@ -81,7 +81,8 @@ class ReportSettingsRegisterPack(BaseRecordListPack):
         preprocessor = DocumentPreprocessor(request.FILES.get('file_template'))
         finded_tags = preprocessor.prepare()
 
-        has_errors = any(map(lambda x: not x[1], finded_tags.iteritems()))
+        # has_errors = any(map(lambda x: not x[1], finded_tags.iteritems()))
+        has_errors = False
 
         if not has_errors:
             return super(ReportSettingsRegisterPack, self).request_save(

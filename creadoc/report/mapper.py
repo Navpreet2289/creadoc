@@ -6,13 +6,19 @@ __author__ = 'damirazo <me@damirazo.ru>'
 
 class CreaDocMapper(object):
     u"""
-    Класс-заполнитель
+    Заполнитель источников данных на основе значений из `ActionContext`
     """
 
     def __init__(self, context):
         self.context = context
 
-    def values(self, sources):
+    def fill(self, sources):
+        u"""
+        Инициализация источников данных стартовыми значениями
+        Возвращает словарь, где в качестве ключа содержится наименование тега,
+        в качестве значения заполненная структура,
+        возвращенная источником данных
+        """
         result = {}
 
         for source in sources:
@@ -26,3 +32,9 @@ class CreaDocMapper(object):
                         u'Источник данных {} не удалось заполнить. '
                         u'Отсутствует значение {} в контексте!'
                     ).format(source.tag, context_name))
+
+                source.fill(value)
+
+            result[source.tag] = source.harvest_data()
+
+        return result

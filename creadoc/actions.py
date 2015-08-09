@@ -37,12 +37,12 @@ class CreaDocActionPack(ActionPack):
         # Получаем объект записи о печатной форме
         report = get_report_by_id(context.report_id)
 
-        # Формируем экземпляр класса-сборщика
-        builder = CreaDocBuilder(report)
         # Формируем экземпляр класса-заполнителя
         mapper = CreaDocMapper(context)
+        # Формируем экземпляр класса-сборщика
+        builder = CreaDocBuilder(report, mapper)
         # Формируем документ и заполняем его
-        document = builder.build(mapper)
+        document = builder.build()
         # Сохраняем результат сборки
         result = document.save()
 
