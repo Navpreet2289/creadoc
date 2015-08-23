@@ -89,17 +89,30 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
                     run.text = params.get(tag_name, '')
 
     def prepare_cycles(self):
+        u"""
+        Обработка циклов
+        """
+        # Глобальное смещение индексов
+        # Происходит потому, что при копировании элементов в блоке с циклом
+        # нам необходимо также увеличить значения всех индексов
         global_shift_index = 0
-
-        def index(num):
-            return num + global_shift_index
+        # Получение реального индекса на основе глобального
+        index = lambda num: num + global_shift_index
 
         for cycle in self.cycles():
+            # Параметры цикла:
+            # 1. Внешнее наименование списочного тега
+            # 2. Наименование тега на каждой итерации
+            # для одного из объектов цикла
             tag, inner_tag = cycle['params'][0]
 
+            # Индекс параграфа, с которого начинается блок цикла
             begin_paragraph = index(cycle['begin_paragraph'])
+            # Индекс параграфа, на котором завершается блок цикла
             end_paragraph = index(cycle['end_paragraph'])
+            # Индекс рана, в котором начинается блок цикла
             begin_run = cycle['begin_run']
+            # Индекс рана, в котором завершается блок цикла
             end_run = cycle['end_run']
 
             source = SourceRegistry.source_by_tag(tag)
@@ -108,6 +121,7 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
                 raise CreaDocException(
                     u'"{}" не является списочным тегом!'.format(source.tag))
 
+            # Срез всех параграфов, которые входят в блок цикла
             paragraphs = self.document.paragraphs[
                 begin_paragraph + 1: end_paragraph
             ]
@@ -123,9 +137,7 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
             for i, row in enumerate(rows, start=1):
                 # Для первой итерации нет необходимости
                 # производить вставку параграфов
-                if i == 1:
-                    pass
-                else:
+                if i > 1:
                     prev_p = end_of_block
                     for p in _p:
                         prev_p._p.addnext(p._p)
@@ -162,7 +174,7 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
             for r_num, run in enumerate(paragraph.runs):
                 text = run.text
 
-                if RE_START_CYCLE_TEMPLATE.match(text):
+                if RE_START_CYCLE_TEMPLATE.search(text):
                     if cycle_block_started:
                         raise CreaDocException(
                             u'Обнаружено начало блока цикла '
@@ -178,7 +190,7 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
                         'params': data,
                     }
 
-                if RE_END_CYCLE_TEMPLATE.match(text):
+                if RE_END_CYCLE_TEMPLATE.search(text):
                     if not cycle_block_started:
                         raise CreaDocException(
                             u'Обнаружен закрывающий тег блока с циклом, '
@@ -229,15 +241,36 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
             start_index = 0
             end_index = 0
 
+            has_tag = any([
+                open_tag in paragraph.text,
+                close_tag in paragraph.text,
+            ])
+
+            # Пропускаем параграфы, которые не содержат теги
+            if not has_tag:
+                continue
+
+            # Ссылка на предыдущий ран
+            prev_run = None
+
             for i, run in enumerate(paragraph.runs):
-                if open_tag in run.text:
+                has_open_tag = lambda: (
+                    open_tag in run.text
+                    or (prev_run and open_tag in prev_run.text + run.text)
+                )
+                has_close_tag = lambda: (
+                    close_tag in run.text
+                    or (prev_run and close_tag in prev_run.text + run.text)
+                )
+
+                if has_open_tag:
                     start_index = i
                     tag_started = True
 
                 if tag_started:
                     current_tag += run.text
 
-                if close_tag in run.text:
+                if has_close_tag:
                     end_index = i
                     tag_started = False
 
@@ -247,6 +280,8 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
                         'end': end_index,
                         'paragraph': paragraph,
                     })
+
+                prev_run = run
 
         for element in storage:
             paragraph = element['paragraph']
@@ -258,5 +293,4 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
             start_run.text = text
 
             for x in xrange(start + 1, end + 1):
-                # del paragraph.runs[x]
                 paragraph.runs[x].text = ''
