@@ -4,6 +4,7 @@ from operator import attrgetter
 from docx import Document
 from creadoc.enums import SourceType
 from creadoc.exceptions import CreaDocException
+from creadoc.helper.tags import tag_data
 from creadoc.registry.source import SourceRegistry
 from creadoc.report.constants import (
     RE_TAG_TEMPLATE, OPEN_TAG, CLOSE_TAG,
@@ -33,21 +34,21 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
 
         for paragraph in self.document.paragraphs:
             for run in paragraph.runs:
-                if RE_START_CYCLE_TEMPLATE.match(run.text):
+                if RE_START_CYCLE_TEMPLATE.search(run.text):
                     block_started = True
 
-                if RE_END_CYCLE_TEMPLATE.match(run.text):
+                if RE_END_CYCLE_TEMPLATE.search(run.text):
                     block_started = False
 
                 # Учитываем только теги,
                 # которые находятся за пределами блока цикла
-                if not block_started and RE_TAG_TEMPLATE.match(run.text):
+                if not block_started and RE_TAG_TEMPLATE.search(run.text):
                     tags.append(RE_TAG_TEMPLATE.findall(run.text)[0])
 
         return tags
 
     def has_tag(self, tag_name):
-        for tag, modifier, _ in self.tags():
+        for full_tag, tag, modifier, _ in self.tags():
             if tag == tag_name:
                 return True
 
@@ -60,7 +61,7 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
         result = {}
 
         for joined_tags in self.tags():
-            segments = joined_tags[0].split('.')
+            segments = joined_tags[1].split('.')
             root_tag = segments[0]
 
             source = SourceRegistry.source_by_tag(root_tag)
@@ -80,13 +81,14 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
         """
         for paragraph in self.document.paragraphs:
             for run in paragraph.runs:
-                if RE_TAG_TEMPLATE.match(run.text):
-                    tag_name = RE_TAG_TEMPLATE.findall(run.text)[0][0]
+                if RE_TAG_TEMPLATE.search(run.text):
+                    tag = tag_data(run.text)
 
-                    if not self.has_tag(tag_name):
+                    if not self.has_tag(tag['tag_name']):
                         continue
 
-                    run.text = params.get(tag_name, '')
+                    run.text = run.text.replace(
+                        tag['full_tag'], params.get(tag['tag_name'], ''))
 
     def prepare_cycles(self):
         u"""

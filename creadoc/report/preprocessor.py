@@ -47,7 +47,7 @@ class DocumentPreprocessor(object):
 
         result = {}
 
-        for tag, modifier, _ in tags:
+        for full_tag, tag, modifier, _ in tags:
             segments = tag.split('.')
             root_tag = segments[0]
 

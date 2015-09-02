@@ -38,7 +38,7 @@ class CreaDocBuilder(object):
         values = self.mapper.fill(self.document.wrapper.sources())
 
         for tag_data in self.document.wrapper.tags():
-            tag_name = tag_data[0]
+            tag_name = tag_data[1]
             segments = tag_name.split('.')
             value = self.get_by_key(values, segments)
             to_replace[tag_name] = value or ''
