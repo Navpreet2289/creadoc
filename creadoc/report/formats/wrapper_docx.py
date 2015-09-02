@@ -124,30 +124,38 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
                     u'"{}" не является списочным тегом!'.format(source.tag))
 
             # Срез всех параграфов, которые входят в блок цикла
-            paragraphs = self.document.paragraphs[
+            paragraphs_in_block = self.document.paragraphs[
                 begin_paragraph + 1: end_paragraph
             ]
 
-            _p = []
+            # Список копируемых в рамках блока параграфов
+            paragraphs_to_copy = []
+            paragraph_enumerator = enumerate(
+                paragraphs_in_block,
+                start=begin_paragraph + 1
+            )
 
-            for i, paragraph in enumerate(paragraphs, start=begin_paragraph + 1):
-                _p.append(deepcopy(paragraph))
+            # Сохраняем копии всех копируемых параграфов
+            for i, paragraph in paragraph_enumerator:
+                paragraphs_to_copy.append(deepcopy(paragraph))
 
             rows = source.harvest_data()
             end_of_block = self.document.paragraphs[end_paragraph - 1]
 
             for i, row in enumerate(rows, start=1):
-                # Для первой итерации нет необходимости
-                # производить вставку параграфов
                 if i > 1:
-                    prev_p = end_of_block
-                    for p in _p:
-                        prev_p._p.addnext(p._p)
-                        prev_p = p
+                    previous_paragraph = end_of_block
 
+                    for paragraph_to_copy in paragraphs_to_copy:
+                        copied_paragraph = deepcopy(paragraph_to_copy)
+                        previous_paragraph._p.addnext(copied_paragraph._p)
+                        previous_paragraph = copied_paragraph
+
+                        # Смещаем глобальный индекс
                         global_shift_index += 1
 
-                pass
+                        for run in copied_paragraph.runs:
+                            pass
 
     def normalize(self):
         u"""
