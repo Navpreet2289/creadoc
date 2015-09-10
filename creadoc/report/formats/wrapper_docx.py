@@ -4,7 +4,7 @@ from operator import attrgetter
 from docx import Document
 from creadoc.enums import SourceType
 from creadoc.exceptions import CreaDocException
-from creadoc.helper.tags import tag_data
+from creadoc.helper.tags import tag_data, get_by_key
 from creadoc.registry.source import SourceRegistry
 from creadoc.report.constants import (
     RE_TAG_TEMPLATE, OPEN_TAG, CLOSE_TAG,
@@ -140,22 +140,70 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
                 paragraphs_to_copy.append(deepcopy(paragraph))
 
             rows = source.harvest_data()
-            end_of_block = self.document.paragraphs[end_paragraph - 1]
+            previous_paragraph = self.document.paragraphs[end_paragraph - 1]
 
             for i, row in enumerate(rows, start=1):
                 if i > 1:
-                    previous_paragraph = end_of_block
-
-                    for paragraph_to_copy in paragraphs_to_copy:
-                        copied_paragraph = deepcopy(paragraph_to_copy)
+                    for paragraph in paragraphs_to_copy:
+                        copied_paragraph = deepcopy(paragraph)
                         previous_paragraph._p.addnext(copied_paragraph._p)
                         previous_paragraph = copied_paragraph
 
                         # Смещаем глобальный индекс
                         global_shift_index += 1
 
-                        for run in copied_paragraph.runs:
-                            pass
+                        self._prepare_cycle_runs(
+                            i,
+                            row,
+                            inner_tag,
+                            copied_paragraph.runs
+                        )
+
+                else:
+                    for paragraph in paragraphs_in_block:
+                        self._prepare_cycle_runs(
+                            i,
+                            row,
+                            inner_tag,
+                            paragraph.runs
+                        )
+
+    def _prepare_cycle_runs(self, iteration_num, row, inner_tag_name, runs):
+        u"""
+        Обработка ранов для блока цикла
+
+        :param iteration_num: Номер текущей итерации
+        :param row: Объект записи для текущей итерации
+        :param inner_tag_name: Имя списочного тега на каждой итерации
+        :param runs: Список обрабатываемых ранов (в рамках параграфа)
+        """
+        iteration_number_tag = u'НомерИтерации'
+
+        for run in runs:
+            if RE_TAG_TEMPLATE.search(run.text):
+                _tag_data = tag_data(run.text)
+                _tag_data_segments = (
+                    _tag_data['tag_name'].split('.'))
+
+                root_tag = _tag_data_segments[0]
+
+                # Тег для текущей итерации
+                if root_tag == inner_tag_name:
+                    value = get_by_key(
+                        row,
+                        _tag_data_segments[1:]
+                    )
+                elif root_tag == iteration_number_tag:
+                    value = iteration_num
+                # Обычные теги из верхней области видимости
+                else:
+                    # FIXME: Не забыть убрать
+                    value = 'TEST'
+
+                run.text = run.text.replace(
+                    _tag_data['full_tag'],
+                    unicode(value)
+                )
 
     def normalize(self):
         u"""
@@ -263,35 +311,48 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
             # Ссылка на предыдущий ран
             prev_run = None
 
-            for i, run in enumerate(paragraph.runs):
-                has_open_tag = lambda: (
-                    open_tag in run.text
-                    or (prev_run and open_tag in prev_run.text + run.text)
-                )
-                has_close_tag = lambda: (
-                    close_tag in run.text
-                    or (prev_run and close_tag in prev_run.text + run.text)
-                )
+            prefix_count = 0
+            postfix_count = 0
 
-                if has_open_tag:
+            for i, run in enumerate(paragraph.runs, start=1):
+                try:
+                    next_run = paragraph.runs[i]
+                    text = run.text + next_run.text
+                except IndexError:
+                    text = run.text
+
+                if open_tag in text:
+                    if current_tag:
+                        prefix_count = current_tag.count(open_tag)
+                    else:
+                        prefix_count = run.text.count(open_tag)
+
                     start_index = i
                     tag_started = True
 
                 if tag_started:
                     current_tag += run.text
 
-                if has_close_tag:
-                    end_index = i
-                    tag_started = False
+                if close_tag in text:
+                    postfix_count = current_tag.count(close_tag)
 
-                    storage.append({
-                        'text': current_tag,
-                        'start': start_index,
-                        'end': end_index,
-                        'paragraph': paragraph,
-                    })
+                    # Проверяем, что мы закрыли столько же тегов,
+                    # сколько открыли
+                    if prefix_count == postfix_count:
+                        end_index = i
+                        tag_started = False
 
-                prev_run = run
+                        prefix_count = 0
+                        postfix_count = 0
+
+                        storage.append({
+                            'text': current_tag,
+                            'start': start_index,
+                            'end': end_index,
+                            'paragraph': paragraph,
+                        })
+
+                        current_tag = u''
 
         for element in storage:
             paragraph = element['paragraph']

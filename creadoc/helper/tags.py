@@ -27,3 +27,14 @@ def tag_data(value):
         'modifier': modifier,
         'unknown': unknown,
     }
+
+
+def get_by_key(data, path):
+    u"""
+    Возвращает значение с указанным ключем
+    """
+    result = reduce(
+        lambda dct, k: dct and dct.get(k) or None,
+        path, data)
+
+    return result
