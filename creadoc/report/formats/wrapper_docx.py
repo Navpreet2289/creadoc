@@ -1,6 +1,6 @@
 # coding: utf-8
 from copy import copy, deepcopy
-from operator import attrgetter
+from operator import attrgetter, itemgetter
 from docx import Document
 from creadoc.enums import SourceType
 from creadoc.exceptions import CreaDocException
@@ -106,7 +106,7 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
             # 1. Внешнее наименование списочного тега
             # 2. Наименование тега на каждой итерации
             # для одного из объектов цикла
-            tag, inner_tag = cycle['params'][0]
+            full_tag, tag, inner_tag = cycle['params'][0]
 
             # Индекс параграфа, с которого начинается блок цикла
             begin_paragraph = index(cycle['begin_paragraph'])
@@ -215,9 +215,11 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
         затем объединить их всех в один "ран".
         """
         # Нормализация обычных тегов
-        self._normalize_runs(OPEN_TAG, CLOSE_TAG)
-        # Нормализация блочных тегов
-        self._normalize_runs(OPEN_BLOCK_TAG, CLOSE_BLOCK_TAG)
+        self._normalize_runs(RE_TAG_TEMPLATE)
+        # Нормализация тегов начала блока цикла
+        self._normalize_runs(RE_START_CYCLE_TEMPLATE)
+        # Нормализация тегов окончания блока цикла
+        self._normalize_runs(RE_END_CYCLE_TEMPLATE)
 
     def cycles(self):
         u"""
@@ -285,83 +287,50 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
         """
         return u'\n'.join(self._paragraphs())
 
-    def _normalize_runs(self, open_tag, close_tag):
+    def _normalize_runs(self, search_tag_template):
         u"""
         Выполнение нормализации "ранов" для тегов
         с указанными признаками открытия и закрытия
         """
-        storage = []
-
         for paragraph in self.document.paragraphs:
-            tag_started = False
-            current_tag = u''
+            paragraph_texts = map(lambda x: x.text, paragraph.runs)
 
-            start_index = 0
-            end_index = 0
+            params = set(map(
+                itemgetter(0),
+                search_tag_template.findall(paragraph.text)
+            ))
 
-            has_tag = any([
-                open_tag in paragraph.text,
-                close_tag in paragraph.text,
-            ])
+            for param in params:
+                current_text = u''
+                begin_index = 0
+                end_index = 0
 
-            # Пропускаем параграфы, которые не содержат теги
-            if not has_tag:
-                continue
+                for run_index, text in enumerate(paragraph_texts):
+                    current_text += text
 
-            # Ссылка на предыдущий ран
-            prev_run = None
+                    if param in current_text:
+                        end_index = run_index
+                        break
 
-            prefix_count = 0
-            postfix_count = 0
+                current_text = u''
 
-            for i, run in enumerate(paragraph.runs, start=1):
-                try:
-                    next_run = paragraph.runs[i]
-                    text = run.text + next_run.text
-                except IndexError:
-                    text = run.text
+                for run_index, text in enumerate(reversed(paragraph_texts)):
+                    current_text = text + current_text
 
-                if open_tag in text:
-                    if current_tag:
-                        prefix_count = current_tag.count(open_tag)
-                    else:
-                        prefix_count = run.text.count(open_tag)
+                    if param in current_text:
+                        begin_index = len(paragraph_texts) - run_index - 1
+                        break
 
-                    start_index = i
-                    tag_started = True
+                tag_value = u''
 
-                if tag_started:
-                    current_tag += run.text
+                for run_index, run in enumerate(paragraph.runs):
+                    if begin_index <= run_index <= end_index:
+                        tag_value += run.text
 
-                if close_tag in text:
-                    postfix_count = current_tag.count(close_tag)
+                for run_index, run in enumerate(paragraph.runs):
+                    if begin_index == run_index:
+                        run.text = tag_value
+                    if begin_index < run_index <= end_index:
+                        run.text = u''
 
-                    # Проверяем, что мы закрыли столько же тегов,
-                    # сколько открыли
-                    if prefix_count == postfix_count:
-                        end_index = i
-                        tag_started = False
-
-                        prefix_count = 0
-                        postfix_count = 0
-
-                        storage.append({
-                            'text': current_tag,
-                            'start': start_index,
-                            'end': end_index,
-                            'paragraph': paragraph,
-                        })
-
-                        current_tag = u''
-
-        for element in storage:
-            paragraph = element['paragraph']
-            start = element['start']
-            end = element['end']
-            text = element['text']
-
-            start_run = paragraph.runs[start]
-            start_run.text = text
-
-            for x in xrange(start + 1, end + 1):
-                paragraph.runs[x].text = ''
+                new_text = paragraph.text

@@ -36,7 +36,7 @@ CLOSE_BLOCK_TAG = '%}'
 # "Запись" наименование тега внутри блока цикла
 START_CYCLE_TEXT = u'НачалоЦикла'
 START_CYCLE_TEMPLATE = (
-    u'{}\s*{}\s+?([\w\d\а-яА-Я]+)\s+([\w\d\а-яА-Я]+)\s*{}'
+    u'({}\s*{}\s+?([\w\d\а-яА-Я]+)\s+([\w\d\а-яА-Я]+)\s*{})'
 ).format(
     OPEN_BLOCK_TAG,
     START_CYCLE_TEXT,
@@ -46,7 +46,7 @@ RE_START_CYCLE_TEMPLATE = re.compile(START_CYCLE_TEMPLATE, re.I | re.U)
 
 # Текст обозначения окончания цикла
 END_CYCLE_TEXT = u'КонецЦикла'
-END_CYCLE_TEMPLATE = u'{}\s*{}\s*{}'.format(
+END_CYCLE_TEMPLATE = u'({}\s*({})\s*{})'.format(
     OPEN_BLOCK_TAG,
     END_CYCLE_TEXT,
     CLOSE_BLOCK_TAG,
