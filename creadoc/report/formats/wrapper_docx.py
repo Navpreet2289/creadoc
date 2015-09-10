@@ -124,9 +124,14 @@ class DocxCreaDocFormatWrapper(CreaDocFormatWrapper):
                     u'"{}" не является списочным тегом!'.format(source.tag))
 
             # Срез всех параграфов, которые входят в блок цикла
-            paragraphs_in_block = self.document.paragraphs[
-                begin_paragraph + 1: end_paragraph
-            ]
+            if begin_paragraph == end_paragraph:
+                paragraphs_in_block = [
+                    self.document.paragraphs[begin_paragraph],
+                ]
+            else:
+                paragraphs_in_block = self.document.paragraphs[
+                    begin_paragraph: end_paragraph
+                ]
 
             # Список копируемых в рамках блока параграфов
             paragraphs_to_copy = []
