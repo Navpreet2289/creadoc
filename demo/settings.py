@@ -1,9 +1,9 @@
 # coding: utf-8
 import os
 
-
-M3_EXT_ROOT = '/home/damirazo/venv/web_bb_new/local/lib/python2.7/site-packages/m3_ext'
-M3_ROOT = '/home/damirazo/venv/web_bb_new/local/lib/python2.7/site-packages/m3'
+PACKAGES_PATH = '/home/damirazo/.venv/creadoc/local/lib/python2.7/site-packages/'
+M3_EXT_ROOT = os.path.join(PACKAGES_PATH, 'm3_ext')
+M3_ROOT = os.path.join(PACKAGES_PATH, 'm3')
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 SECRET_KEY = 'yunz7!4sczxfx2mur-sec620px!l-(5_+0^o3j&#r!w6&11ubk'
@@ -23,8 +23,7 @@ INSTALLED_APPS = (
     'creadoc',
 
     'demo.app',
-    'demo.app.cars',
-    'demo.app.report_settings',
+    'demo.app.designer',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -59,6 +58,7 @@ TEMPLATE_DIRS = (
 
 STATICFILES_DIRS = (
     os.path.join(M3_EXT_ROOT, 'static'),
+    os.path.join(BASE_DIR, 'creadoc', 'static'),
 )
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'demo', 'media')
