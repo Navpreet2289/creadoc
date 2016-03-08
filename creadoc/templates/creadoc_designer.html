@@ -19,6 +19,13 @@
             // Параметры дизайнера отчетов
             var options = new Stimulsoft.Designer.StiDesignerOptions();
             options.appearance.fullScreenMode = true;
+            options.appearance.showSaveDialog = false;
+            options.toolbar.showFileMenuReportSetup = false;
+            options.toolbar.showFileMenuOptions = false;
+            options.toolbar.showFileMenuExit = false;
+            options.toolbar.showAboutButton = false;
+            options.toolbar.showSaveButton = false;
+            options.toolbar.showFileMenuClose = false;
 
             // Формирование экземпляра дизайнера
             var designer = new Stimulsoft.Designer.StiDesigner(options, "StiDesigner", false);
@@ -26,6 +33,12 @@
             // Логика, выполняемая при выходе из дизайнера
             designer.onExit = function(e) {
                 this.visible = false;
+                alert('exit');
+            };
+
+            designer.onSaveReport = function(e) {
+                var reportData = e.report.saveToJsonString();
+                alert(reportData);
             };
 
             // Формируем экземпляр отчета
