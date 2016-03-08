@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.template import loader, Context
 from m3.actions import ActionPack, Action, OperationResult
 from creadoc.creator.forms import DesignerIframeWindow
+from creadoc.source.registry import DSR
 
 __author__ = 'damirazo <me@damirazo.ru>'
 
@@ -31,7 +32,7 @@ class CreadocDesignerActionPack(ActionPack):
 
 class CreadocDesignerShowAction(Action):
     u"""
-    Генерация фрейма, содержащего редактор отчетов
+    Формирование окна, содержащего фрейм с дизайнером
     """
     url = '/show'
 
@@ -44,9 +45,15 @@ class CreadocDesignerShowAction(Action):
 
 
 class CreadocDesignerIframeAction(Action):
+    u"""
+    Формирование фрейма, содержащего страницу с дизайнером
+    Заполнение дизайнера зарегистрированными источниками данных
+    """
     url = '/iframe'
 
     def run(self, request, context):
         t = loader.get_template('creadoc_designer.html')
+        ctx = Context()
+        ctx['element_data_sources'] = DSR.all()
 
-        return HttpResponse(t.render(Context()))
+        return HttpResponse(t.render(ctx))
