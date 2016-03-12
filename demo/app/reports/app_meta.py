@@ -2,7 +2,9 @@
 from m3_ext.ui.app_ui import (
     DesktopShortcut, DesktopLoader)
 from m3_users import metaroles, GENERIC_USER
-from demo.app.helpers import find_pack
+from creadoc.source.helpers import source_creator
+from creadoc.source.registry import DSR
+from demo.app.helpers import find_pack, get_action_url
 from demo.app import controller
 from demo.app.reports.actions import ReportListActionPack
 
@@ -29,3 +31,11 @@ def register_desktop_menu():
         place=DesktopLoader.TOPTOOLBAR,
         element=reports_root,
     )
+
+
+DSR.add_sources(
+    source_creator(
+        name=u'Список сотрудников',
+        url=get_action_url(ReportListActionPack, 'action_test_data'),
+    ),
+)

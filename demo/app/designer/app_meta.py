@@ -26,8 +26,10 @@ def register_desktop_menu():
     )
 
 
-DSR.register(
-    variable_creator(u'Приветствие', u'Привет, Мир!', description=u'Тестовое описание переменной'),
+DSR.add_variables(
+    variable_creator(
+        u'Приветствие', u'Привет, Мир!',
+        description=u'Тестовое описание переменной'),
     variable_creator(u'НаименованиеУчреждения', u'Касатка', category=u'ЗиК'),
     variable_creator(u'РабочаяДата', u'01.01.2012', category=u'ЗиК'),
 )

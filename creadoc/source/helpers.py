@@ -1,11 +1,9 @@
 # coding: utf-8
-from creadoc.source.variable import VariableDataSource
-from creadoc.source.enums import DataSourceTypeEnum
+from creadoc.source.constants import BASE_CATEGORY
+from creadoc.source.data_source import DataSource
+from creadoc.source.variable import Variable
 
 __author__ = 'damirazo <me@damirazo.ru>'
-
-
-BASE_CATEGORY = u'Общие переменные'
 
 
 def variable_creator(name, value, category=None, description=None):
@@ -17,11 +15,23 @@ def variable_creator(name, value, category=None, description=None):
     :param description: Описание переменной
     :return: ElementDataSource
     """
-    data_source = VariableDataSource()
-    data_source.type = DataSourceTypeEnum.VARIABLE
+    variable = Variable(
+        name=name,
+        category=category or BASE_CATEGORY,
+        description=description or u'',
+    )
+
+    if callable(value):
+        variable.value = value
+    else:
+        variable.value = lambda: value
+
+    return variable
+
+
+def source_creator(name, url):
+    data_source = DataSource()
+    data_source.url = url
     data_source.name = name
-    data_source.data = lambda: value
-    data_source.category = category or BASE_CATEGORY
-    data_source.description = description or u''
 
     return data_source

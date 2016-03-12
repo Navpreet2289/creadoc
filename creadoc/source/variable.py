@@ -1,10 +1,23 @@
 # coding: utf-8
-from creadoc.source.abstract import AbstractDataSource
 
 __author__ = 'damirazo <me@damirazo.ru>'
 
 
-class VariableDataSource(AbstractDataSource):
+class Variable(object):
+    u"""
+    Базовый класс для шаблонной переменной
+    """
 
-    def data(self):
-        pass
+    name = None
+    category = None
+    description = None
+
+    def __init__(self, name, category, description):
+        assert name is not None, u'Требуется задать имя переменной!'
+
+        self.name = name
+        self.category = category
+        self.description = description
+
+    def value(self):
+        raise NotImplementedError(u'Требуется реализовать метод value!')

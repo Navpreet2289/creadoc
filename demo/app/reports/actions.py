@@ -1,5 +1,8 @@
 # coding: utf-8
-from m3.actions import ActionPack, Action, OperationResult
+import random
+import string
+
+from m3.actions import ActionPack, Action, OperationResult, PreJsonResult
 
 __author__ = 'damirazo <me@damirazo.ru>'
 
@@ -15,9 +18,11 @@ class ReportListActionPack(ActionPack):
         super(ReportListActionPack, self).__init__()
 
         self.action_rows = ReportListRowsAction()
+        self.action_test_data = ReportTestDataAction()
 
         self.actions.extend([
             self.action_rows,
+            self.action_test_data,
         ])
 
     def get_list_url(self):
@@ -32,3 +37,23 @@ class ReportListRowsAction(Action):
 
     def run(self, request, context):
         return OperationResult(message=u'Окно со списком отчетов')
+
+
+class ReportTestDataAction(Action):
+    url = '/data.json'
+
+    def run(self, request, context):
+        result = []
+
+        for x in xrange(1, 101):
+            result.append({
+                'name': u''.join(map(
+                    lambda x: random.choice(string.ascii_lowercase),
+                    xrange(random.randint(3, 10)),
+                )),
+                'value': random.randint(0, 1000),
+            })
+
+        return PreJsonResult({
+            'list': result,
+        })
