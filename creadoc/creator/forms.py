@@ -39,6 +39,11 @@ class DesignerReportsListWindow(ExtWindow):
 
     columns = (
         {
+            'header': 'id',
+            'data_index': 'id',
+            'hidden': True,
+        },
+        {
             'header': u'Идентификатор',
             'data_index': 'guid',
             'hidden': True,
@@ -77,7 +82,5 @@ class DesignerReportsListWindow(ExtWindow):
         grid.layout = 'fit'
         grid.region = 'center'
         grid.allow_paging = False
-        grid.row_id_name = 'guid'
-        grid.store.id_property = 'guid'
 
         return grid

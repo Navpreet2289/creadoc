@@ -4,7 +4,7 @@ import os
 PACKAGES_PATH = '/home/damirazo/.venv/creadoc/local/lib/python2.7/site-packages/'
 M3_EXT_ROOT = os.path.join(PACKAGES_PATH, 'm3_ext')
 M3_ROOT = os.path.join(PACKAGES_PATH, 'm3')
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 SECRET_KEY = 'yunz7!4sczxfx2mur-sec620px!l-(5_+0^o3j&#r!w6&11ubk'
 DEBUG = True
@@ -59,8 +59,15 @@ TEMPLATE_DIRS = (
 
 STATICFILES_DIRS = (
     os.path.join(M3_EXT_ROOT, 'static'),
-    os.path.join(BASE_DIR, 'creadoc', 'static'),
 )
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'demo', 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/downloads/'
+
+
+# Наименование директории в MEDIA_ROOT, в которую сохраняются шаблоны
+CREADOC_REPORTS_DIR = 'reports'
+# Путь до директории с шаблонами
+CREADOC_REPORTS_ROOT = os.path.join(MEDIA_ROOT, CREADOC_REPORTS_DIR)
+# URL, по которому доступны шаблоны
+CREADOC_REPORTS_URL = MEDIA_URL + CREADOC_REPORTS_DIR + '/'

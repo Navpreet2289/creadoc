@@ -9,8 +9,10 @@
     <script src="/static/scripts/stimulsoft.reports.js" type="text/javascript"></script>
     <script src="/static/scripts/stimulsoft.viewer.js" type="text/javascript"></script>
     <script src="/static/scripts/stimulsoft.designer.js" type="text/javascript"></script>
-    <script src="/static/demo/Demo.js" type="text/javascript"></script>
+    <script src="/static/scripts/jquery-1.12.1.min.js" type="text/javascript"></script>
     <script>
+        var report;
+
         /**
          * Формирование дизайнера отчета
          */
@@ -26,23 +28,11 @@
             // Формирование экземпляра дизайнера
             var designer = new Stimulsoft.Designer.StiDesigner(options, "StiDesigner", false);
 
-            // Логика, выполняемая при выходе из дизайнера
-            designer.onExit = function(e) {
-                this.visible = false;
-                alert('exit');
-            };
-
-            // Перехват сохранения шаблона
-            designer.onSaveReport = function(e) {
-                var reportData = e.report.saveToJsonString();
-                alert(reportData);
-            };
-
             // Формируем экземпляр отчета
-            var report = new Stimulsoft.Report.StiReport();
+            report = new Stimulsoft.Report.StiReport();
 
             // Загружаем шаблон отчета
-            var templatePath = "/static/reports/{{ template_name | safe }}.mrt";
+            var templatePath = "{{ template_url | safe }}";
 
             try {
                 report.loadFile(templatePath);
@@ -86,8 +76,6 @@
             );
             {% endfor %}
 
-            report.dictionary.synchronize();
-
             // Связывание шаблона и дизайнера
             designer.report = report;
             // Рендерим дизайнер в элемент с указанным идентификатором
@@ -96,7 +84,11 @@
 
         // Обработка логики сохранения шаблона
         window.addEventListener('templatesave', function(e) {
-            debugger;
+            if (report) {
+                $.post('{{ report_save_url }}', {
+                    'report': report.saveToJsonString()
+                });
+            }
         });
 
         window.onload = function() {
