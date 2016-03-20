@@ -1,5 +1,6 @@
 # coding: utf-8
-from m3_ext.ui.containers import ExtPanel
+from m3_ext.ui.containers import ExtPanel, ExtContainer
+from m3_ext.ui.controls import ExtButton
 from m3_ext.ui.panels import ExtObjectGrid
 from m3_ext.ui.windows import ExtEditWindow, ExtWindow
 
@@ -11,7 +12,7 @@ class DesignerIframeWindow(ExtEditWindow):
     Окно с фреймом дизайнера
     """
 
-    def __init__(self, url):
+    def __init__(self, frame_url, report_id):
         super(DesignerIframeWindow, self).__init__()
 
         self.title = u'Дизайнер отчетов'
@@ -19,17 +20,29 @@ class DesignerIframeWindow(ExtEditWindow):
         self.modal = True
         self.template_globals = 'scripts/DesignerIframeWindow.js'
 
+        self.report_id = report_id
+
         panel = ExtPanel()
         panel.html = (
             u'<iframe id="creadoc-iframe" src="{}" width="99%" height="99%">'
             u'Фреймы не поддерживаются'
             u'</iframe>'
-        ).format(url)
+        ).format(frame_url)
 
         self.layout = 'border'
         panel.region = 'center'
         panel.layout = 'fit'
         self.items.append(panel)
+
+        self.bottom_bar = ExtContainer()
+        self.bottom_bar.height = 30
+        self.bottom_bar.items.append(
+            ExtButton(
+                text=u'Сохранить шаблон',
+                handler='saveReport',
+                style={'float': 'right', 'margin': '4px 30px 0 0'},
+            )
+        )
 
 
 class DesignerReportsListWindow(ExtWindow):

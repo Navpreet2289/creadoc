@@ -67,7 +67,10 @@ class CreadocDesignerShowAction(Action):
             self.parent.action_iframe.get_absolute_url(),
             context.report_id
         )
-        win = DesignerIframeWindow(url=url)
+        win = DesignerIframeWindow(
+            frame_url=url,
+            report_id=context.report_id,
+        )
 
         return ExtUIScriptResult(win, context)
 
@@ -186,18 +189,31 @@ class CreadocDesignerReportSaveAction(Action):
             'report': {
                 'type': 'unicode',
                 'required': True,
-            }
+            },
+            'id': {'type': 'int', 'required': True, 'default': None},
+            'name': {'type': 'unicode', 'required': True, 'default': None},
         }
 
     @transaction.atomic
     def run(self, request, context):
         report_data = context.report
-        report_guid = str(uuid.uuid4())
 
-        report = CreadocReport()
-        report.name = report_guid
-        report.guid = report_guid
-        report.save()
+        if context.id:
+            try:
+                report = CreadocReport.objects.get(pk=context.id)
+            except CreadocReport.DoesNotExist:
+                raise ApplicationLogicException((
+                    u'Шаблон с id={} отсутствует!'
+                ).format(context.id))
+
+            report_guid = report.guid
+        else:
+            report_guid = str(uuid.uuid4())
+
+            report = CreadocReport()
+            report.name = context.name
+            report.guid = report_guid
+            report.save()
 
         with open(os.path.join(settings.CREADOC_REPORTS_ROOT, report_guid + '.mrt'), 'w+') as f:  # noqa
             f.write(report_data.encode('utf-8'))
@@ -211,5 +227,24 @@ class CreadocDesignerReportDeleteAction(Action):
     """
     url = '/delete'
 
+    def context_declaration(self):
+        return {
+            'row_id': {'type': 'int', 'required': True},
+        }
+
     def run(self, request, context):
-        pass
+        try:
+            report = CreadocReport.objects.get(pk=context.row_id)
+        except CreadocReport.DoesNotExist:
+            raise ApplicationLogicException((
+                u'Шаблон с id={} отсутствует!'
+            ).format(context.row_id))
+
+        report_path = os.path.join(
+            settings.CREADOC_REPORTS_ROOT,
+            report.guid + '.mrt')
+        os.remove(report_path)
+
+        report.delete()
+
+        return OperationResult()

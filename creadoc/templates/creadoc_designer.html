@@ -84,9 +84,24 @@
 
         // Обработка логики сохранения шаблона
         window.addEventListener('templatesave', function(e) {
+            debugger;
             if (report) {
-                $.post('{{ report_save_url }}', {
-                    'report': report.saveToJsonString()
+                var detail = e.detail;
+                var params = {
+                    'report': report.saveToJsonString(),
+                    'id': detail.reportId
+                };
+
+                if (detail.reportName) {
+                    params['name'] = detail.reportName;
+                }
+
+                $.ajax({
+                    url: '{{ report_save_url }}',
+                    data: params,
+                    method: 'POST'
+                }).done(function(response) {
+                    debugger;
                 });
             }
         });
