@@ -68,13 +68,12 @@
             report.dictionary.databases.clear();
 
             {% for source in sources %}
-            report.dictionary.databases.add(
-                new Stimulsoft.Report.Dictionary.StiJsonDatabase(
-                    '{{ source.name }}',
-                    '{{ source.url }}'
-                )
-            );
+            var dataSet = new Stimulsoft.System.Data.DataSet('{{ source.name }}');
+            // TODO: Неоптимальная логика
+            dataSet.readJsonFile('{{ source.url }}');
+            report.regData(dataSet.dataSetName, "", dataSet);
             {% endfor %}
+            report.dictionary.synchronize();
 
             // Связывание шаблона и дизайнера
             designer.report = report;

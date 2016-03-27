@@ -45,7 +45,7 @@ class ReportTestDataAction(Action):
     def run(self, request, context):
         result = []
 
-        for x in xrange(1, 101):
+        for x in xrange(1, 5001):
             result.append({
                 'name': u''.join(map(
                     lambda x: random.choice(string.ascii_lowercase),
@@ -55,5 +55,5 @@ class ReportTestDataAction(Action):
             })
 
         return PreJsonResult({
-            'list': result,
+            u'Полный список сотрудников': result,
         })
