@@ -56,22 +56,9 @@ function closeWindow() {
         'Все несохраненные изменения будут утеряны. Закрыть окно?',
         function(result) {
             if (result == 'yes') {
-                var request = {
-                    'url': reportReleaseUrl,
-                    'params': {
-                        'report_id': reportId
-                    },
-                    success: function(response) {
-
-                    },
-                    failure: function() {
-                        uiAjaxFailMessage.apply(this, arguments);
-                    }
-                };
-
-                win.close(true);
-
-                Ext.Ajax.request(request);
+                requestReleaseReport(function() {
+                    win.close(true);
+                });
             }
         }
     );
@@ -90,6 +77,26 @@ function replaceReportId(response) {
     if (result['success'] && result['report_id']) {
         reportId = result['report_id'];
     }
+}
+
+
+/**
+ * Отправка запроса на освобождение мьютекса
+ * @param callback Функция, вызываемая по окончанию запроса
+ */
+function requestReleaseReport(callback) {
+    var request = {
+        'url': reportReleaseUrl,
+        'params': {
+            'report_id': reportId
+        },
+        success: callback,
+        failure: function() {
+            uiAjaxFailMessage.apply(this, arguments);
+        }
+    };
+
+    Ext.Ajax.request(request);
 }
 
 
@@ -155,7 +162,11 @@ function saveTemplate() {
  */
 function saveTemplateAs() {
     showNameChangeDialog(function(name) {
-        saveRequestWrapper(0, name, true);
+        // Освобождаем предыдущий шаблон перед тем,
+        // как сохранить его под новым именем.
+        requestReleaseReport(function() {
+            saveRequestWrapper(0, name, true);
+        });
     });
 }
 
