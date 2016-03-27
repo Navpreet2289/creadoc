@@ -5,8 +5,9 @@ from django.db import transaction
 from django.conf import settings
 from django.http import HttpResponse
 from django.template import loader, Context
-from m3.actions import ActionPack, Action, PreJsonResult, OperationResult, \
-    ApplicationLogicException
+from m3.actions import (
+    ActionPack, Action, PreJsonResult,
+    OperationResult, ApplicationLogicException)
 from m3_ext.ui.results import ExtUIScriptResult
 from creadoc.creator.forms import (
     DesignerIframeWindow, DesignerReportsListWindow)
@@ -71,6 +72,7 @@ class CreadocDesignerShowAction(Action):
             frame_url=url,
             report_id=context.report_id,
         )
+        win.save_report_url = self.parent.action_report_save.get_absolute_url()
 
         return ExtUIScriptResult(win, context)
 
@@ -88,7 +90,7 @@ class CreadocDesignerIframeAction(Action):
         }
 
     def run(self, request, context):
-        # Если передано наименование шаблона,
+        # Если передан идентификатор шаблона,
         # то это редактирование и мы грузим готовый шаблон.
         # В противном случае загружаем пустой шаблон.
         if not context.report_id:
@@ -103,10 +105,7 @@ class CreadocDesignerIframeAction(Action):
                     u'возможно он был удален.'
                 ).format(context.report_id))
 
-            template_url = '{}{}/{}.mrt'.format(
-                settings.MEDIA_URL,
-                settings.CREADOC_REPORTS_DIR,
-                report.guid)
+            template_url = report.url
 
         t = loader.get_template('creadoc_designer.html')
 
@@ -205,8 +204,6 @@ class CreadocDesignerReportSaveAction(Action):
                 raise ApplicationLogicException((
                     u'Шаблон с id={} отсутствует!'
                 ).format(context.id))
-
-            report_guid = report.guid
         else:
             report_guid = str(uuid.uuid4())
 
@@ -215,10 +212,13 @@ class CreadocDesignerReportSaveAction(Action):
             report.guid = report_guid
             report.save()
 
-        with open(os.path.join(settings.CREADOC_REPORTS_ROOT, report_guid + '.mrt'), 'w+') as f:  # noqa
+        with open(report.path, 'w+') as f:
             f.write(report_data.encode('utf-8'))
 
-        return OperationResult()
+        return PreJsonResult({
+            'success': True,
+            'report_id': report.id,
+        })
 
 
 class CreadocDesignerReportDeleteAction(Action):
@@ -240,10 +240,11 @@ class CreadocDesignerReportDeleteAction(Action):
                 u'Шаблон с id={} отсутствует!'
             ).format(context.row_id))
 
-        report_path = os.path.join(
-            settings.CREADOC_REPORTS_ROOT,
-            report.guid + '.mrt')
-        os.remove(report_path)
+        # Пробуем удалить шаблон. Если отсутствует, то пропускаем.
+        try:
+            os.remove(report.path)
+        except OSError:
+            pass
 
         report.delete()
 

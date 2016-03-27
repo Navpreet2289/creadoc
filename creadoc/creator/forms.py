@@ -17,6 +17,7 @@ class DesignerIframeWindow(ExtEditWindow):
 
         self.title = u'Дизайнер отчетов'
         self.maximized = True
+        self.closable = False
         self.modal = True
         self.template_globals = 'scripts/DesignerIframeWindow.js'
 
@@ -34,15 +35,45 @@ class DesignerIframeWindow(ExtEditWindow):
         panel.layout = 'fit'
         self.items.append(panel)
 
+        # Кнопка закратия окна с подтверждением потери изменений
+        self.btn_close = ExtButton()
+        self.btn_close.handler = 'closeWindow'
+        self.btn_close.style = {'float': 'right', 'margin': '4px 10px 0 0'}
+        self.btn_close.text = u'Закрыть окно'
+
+        # Кнопка сохранения текущего состояния шаблона без закрытия окна
+        self.btn_save = ExtButton()
+        self.btn_save.handler = 'saveTemplate'
+        self.btn_save.style = {'float': 'right', 'margin': '4px 10px 0 0'}
+        self.btn_save.text = u'Сохранить'
+
+        # Кнопка сохранения шаблона с изменением его имени
+        self.btn_save_as = ExtButton()
+        self.btn_save_as.handler = 'saveTemplateAs'
+        self.btn_save_as.style = {'float': 'right', 'margin': '4px 10px 0 0'}
+        self.btn_save_as.text = u'Сохранить как...'
+
+        self.btn_import = ExtButton()
+        self.btn_import.handler = 'Ext.emptyFn'
+        self.btn_import.style = {'float': 'left', 'margin': '4px 0 0 10px'}
+        self.btn_import.disabled = True
+        self.btn_import.text = u'Импорт шаблона'
+
+        self.btn_export = ExtButton()
+        self.btn_export.handler = 'Ext.emptyFn'
+        self.btn_export.style = {'float': 'left', 'margin': '4px 0 0 10px'}
+        self.btn_export.disabled = True
+        self.btn_export.text = u'Экспорт шаблона'
+
         self.bottom_bar = ExtContainer()
         self.bottom_bar.height = 30
-        self.bottom_bar.items.append(
-            ExtButton(
-                text=u'Сохранить шаблон',
-                handler='saveReport',
-                style={'float': 'right', 'margin': '4px 30px 0 0'},
-            )
-        )
+        self.bottom_bar.items.extend([
+            self.btn_import,
+            self.btn_export,
+            self.btn_close,
+            self.btn_save,
+            self.btn_save_as,
+        ])
 
 
 class DesignerReportsListWindow(ExtWindow):
@@ -66,6 +97,11 @@ class DesignerReportsListWindow(ExtWindow):
             'data_index': 'name',
             'sortable': True,
         },
+        {
+            'header': u'Дата создания',
+            'data_index': 'created_at',
+            'sortable': True,
+        }
     )
 
     def __init__(self):
@@ -77,6 +113,7 @@ class DesignerReportsListWindow(ExtWindow):
         self.layout = 'border'
         self.maximizable = True
         self.minimizable = True
+        self.template_globals = 'scripts/DesignerReportsListWindow.js'
 
         self.grid = self.create_grid()
         grid_panel = ExtPanel()

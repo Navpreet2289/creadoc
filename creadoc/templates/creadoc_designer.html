@@ -83,26 +83,10 @@
         }
 
         // Обработка логики сохранения шаблона
-        window.addEventListener('templatesave', function(e) {
-            debugger;
+        window.addEventListener('getTemplate', function(e) {
             if (report) {
-                var detail = e.detail;
-                var params = {
-                    'report': report.saveToJsonString(),
-                    'id': detail.reportId
-                };
-
-                if (detail.reportName) {
-                    params['name'] = detail.reportName;
-                }
-
-                $.ajax({
-                    url: '{{ report_save_url }}',
-                    data: params,
-                    method: 'POST'
-                }).done(function(response) {
-                    debugger;
-                });
+                var template = report.saveToJsonString();
+                e.detail.callback(template);
             }
         });
 

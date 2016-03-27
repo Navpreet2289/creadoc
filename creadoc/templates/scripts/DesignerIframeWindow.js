@@ -1,49 +1,57 @@
 var iframe = Ext.get('creadoc-iframe');
+var iframeWindow = iframe.dom.contentWindow;
 var reportId = Ext.decode('{{ component.report_id }}');
-var isNew = reportId == 0;
 
 
-win.on('beforeclose', onCloseWindow, win, {'single': true});
+// Код клавиши "S"
+var CharCodeS = 19;
+
+// Сохранение шаблона при использовании комбинации клавиш ctrl + shift + S
+iframeWindow.addEventListener('keypress', saveKeyPressHandler);
+win.getEl().dom.addEventListener('keypress', saveKeyPressHandler);
+
+function saveKeyPressHandler(e) {
+    if (e.ctrlKey && e.shiftKey && e.charCode == CharCodeS) {
+        saveTemplate();
+    }
+}
+
+
+/**
+ * Проверка является ли текущий шаблон новым и еще не сохраненным
+ * @returns {boolean}
+ */
+function isNewReport() {
+    return reportId == 0;
+}
 
 
 /**
  * Формирование объекта события
  * @returns {CustomEvent}
  */
-function createEvent(name) {
-    var params = {
-        reportId: reportId,
-        reportName: name || '',
-        parentWindow: win
-    };
-
+function getTemplateEvent(callback) {
     return new CustomEvent(
-        'templatesave',
-        {
+        'getTemplate', {
             bubbles : true,
             cancelable : true,
-            detail: params
+            detail: {'callback': callback}
         }
     );
 }
 
 
 /**
- * Обработчик, выполняемый при попытке закрытия окна с фреймом
+ * Обработка диалога подтверждения закрытия окна
  * @returns {boolean}
  */
-function onCloseWindow() {
+function closeWindow() {
     Ext.Msg.confirm(
         'Внимание!',
-        'Сохранить шаблон перед выходом?',
+        'Все несохраненные изменения будут утеряны. Закрыть окно?',
         function(result) {
             if (result == 'yes') {
-                if (isNew) {
-                    saveReport();
-                } else {
-                    iframe.dom.contentWindow.dispatchEvent(createEvent());
-                    win.close(true);
-                }
+                win.close(true);
             }
         }
     );
@@ -53,40 +61,98 @@ function onCloseWindow() {
 
 
 /**
- * Обработчик кнопки сохранения отчета
+ * Замена идентификатора текущего редактируемого шаблона
+ * @param response
  */
-function saveReport() {
-    if (isNew) {
-        Ext.Msg.prompt(
-            'Сохранение шаблона',
-            'Введите наименование шаблона',
-            function(result, name) {
-                if (result == 'ok' && name) {
-                    // Отправляем событие о необходимости сохранения шаблона
-                    iframe.dom.contentWindow.dispatchEvent(createEvent(name));
-                    // Отписываемся от события при закрытии окна
-                    win.un('beforeclose', onCloseWindow);
-                    // Закрываем окно
-                    win.close(true);
-                }
-            }
-        );
-    } else {
-        Ext.Msg.confirm(
-            'Внимание!',
-            'Сохранить шаблон и закрыть окно?',
-            function(result) {
-                if (result == 'yes') {
-                    // Отправляем событие о необходимости сохранения шаблона
-                    iframe.dom.contentWindow.dispatchEvent(createEvent());
-                    // Отписываемся от события при закрытии окна
-                    win.un('beforeclose', onCloseWindow);
-                    // Закрываем окно
-                    win.close(true);
-                }
-            }
-        );
-    }
+function replaceReportId(response) {
+    var result = Ext.decode(response.responseText);
 
-    return false;
+    if (result['success'] && result['report_id']) {
+        reportId = result['report_id'];
+    }
+}
+
+
+/**
+ * Отправка запроса на сохранение шаблона
+ * @param reportId
+ * @param reportName
+ * @param template
+ */
+function saveRequest(reportId, reportName, template) {
+    var mask = new Ext.LoadMask(win.body, {msg: 'Сохранение...'});
+    mask.show();
+
+    var request = {
+        url: '{{ component.save_report_url }}',
+        params: {
+            'id': reportId || 0,
+            'name': reportName || '',
+            'report': template
+        },
+        success: function(response) {
+            mask.hide();
+            replaceReportId(response);
+        },
+        failure: function() {
+            mask.hide();
+            uiAjaxFailMessage.apply(this, arguments);
+        }
+    };
+
+    Ext.Ajax.request(request);
+}
+
+
+/**
+ * Обертка над сохранением шаблона. Перед сохранением посылает событие на получение объекта шаблона.
+ * @param reportId Идентификатор шаблона
+ * @param reportName Наименование шаблона
+ */
+function saveRequestWrapper(reportId, reportName) {
+    iframeWindow.dispatchEvent(getTemplateEvent(function(template) {
+        saveRequest(reportId, reportName, template);
+    }));
+}
+
+
+/**
+ * Сохранение шаблона
+ */
+function saveTemplate() {
+    if (isNewReport()) {
+        showNameChangeDialog(function(name) {
+            saveRequestWrapper(reportId, name, true);
+        });
+    } else {
+        saveRequestWrapper(reportId, '');
+    }
+}
+
+
+/**
+ * Сохранение шаблона под новым наименованием
+ */
+function saveTemplateAs() {
+    showNameChangeDialog(function(name) {
+        saveRequestWrapper(0, name, true);
+    });
+}
+
+
+/**
+ * Диалоговое окно с вводом наименования шаблона
+ * @param callback Функция обратного вызова, срабатывающая после ввода наименования.
+ *  На вход первым параметров получает введенное наименование.
+ */
+function showNameChangeDialog(callback) {
+    Ext.Msg.prompt(
+        'Сохранение шаблона',
+        'Введите наименование шаблона',
+        function(result, name) {
+            if (result == 'ok' && name) {
+                callback(name);
+            }
+        }
+    );
 }

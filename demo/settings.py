@@ -20,6 +20,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'south',
+    'm3_mutex',
+    'm3_users',
     'creadoc',
 
     'demo.app',
