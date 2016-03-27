@@ -10,9 +10,11 @@ grid.on('afternewrequest', refreshStoreHandler);
 function refreshStoreHandler(cmp, response, request) {
     var editWin = smart_eval(response.responseText);
 
-    editWin.on('close', function() {
-        grid.refreshStore();
-    });
+    if (editWin) {
+        editWin.on('close', function() {
+            grid.refreshStore();
+        });
+    }
 
     return false;
 }

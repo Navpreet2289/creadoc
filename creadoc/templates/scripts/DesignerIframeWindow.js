@@ -2,6 +2,11 @@ var iframe = Ext.get('creadoc-iframe');
 var iframeWindow = iframe.dom.contentWindow;
 var reportId = Ext.decode('{{ component.report_id }}');
 
+// url для сохранения шаблона
+var reportSaveUrl = '{{ component.save_report_url }}';
+// url для снятия блокировки с шаблона
+var reportReleaseUrl = '{{ component.release_report_url }}';
+
 
 // Код клавиши "S"
 var CharCodeS = 19;
@@ -51,7 +56,22 @@ function closeWindow() {
         'Все несохраненные изменения будут утеряны. Закрыть окно?',
         function(result) {
             if (result == 'yes') {
+                var request = {
+                    'url': reportReleaseUrl,
+                    'params': {
+                        'report_id': reportId
+                    },
+                    success: function(response) {
+
+                    },
+                    failure: function() {
+                        uiAjaxFailMessage.apply(this, arguments);
+                    }
+                };
+
                 win.close(true);
+
+                Ext.Ajax.request(request);
             }
         }
     );
@@ -84,7 +104,7 @@ function saveRequest(reportId, reportName, template) {
     mask.show();
 
     var request = {
-        url: '{{ component.save_report_url }}',
+        url: reportSaveUrl,
         params: {
             'id': reportId || 0,
             'name': reportName || '',

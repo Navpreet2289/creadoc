@@ -12,6 +12,7 @@ from m3_ext.ui.results import ExtUIScriptResult
 from creadoc.creator.forms import (
     DesignerIframeWindow, DesignerReportsListWindow)
 from creadoc.creator.helpers import redirect_to_action
+from creadoc.creator.mutex import CreadocMutex
 from creadoc.models import CreadocReport
 from creadoc.source.registry import DSR
 
@@ -36,6 +37,7 @@ class CreadocDesignerActionPack(ActionPack):
         self.action_report_edit = CreadocDesignerReportEditAction()
         self.action_report_save = CreadocDesignerReportSaveAction()
         self.action_report_delete = CreadocDesignerReportDeleteAction()
+        self.action_report_release = CreadocDesignerReportRelease()
 
         self.actions.extend([
             self.action_show,
@@ -46,6 +48,7 @@ class CreadocDesignerActionPack(ActionPack):
             self.action_report_edit,
             self.action_report_save,
             self.action_report_delete,
+            self.action_report_release,
         ])
 
     def get_list_url(self):
@@ -64,6 +67,18 @@ class CreadocDesignerShowAction(Action):
         }
 
     def run(self, request, context):
+        # При редактировании шаблона сначала проверяем
+        # не редактируется ли он другим пользователем
+        if context.report_id:
+            mutex = CreadocMutex(context.report_id)
+
+            if mutex.is_free():
+                mutex.capture()
+            else:
+                raise ApplicationLogicException(
+                    u'Данный шаблон редактируется '
+                    u'другим пользователем')
+
         url = u'{}?report_id={}'.format(
             self.parent.action_iframe.get_absolute_url(),
             context.report_id
@@ -73,8 +88,30 @@ class CreadocDesignerShowAction(Action):
             report_id=context.report_id,
         )
         win.save_report_url = self.parent.action_report_save.get_absolute_url()
+        win.release_report_url = self.parent.action_report_release.get_absolute_url()  # noqa
 
         return ExtUIScriptResult(win, context)
+
+
+class CreadocDesignerReportRelease(Action):
+    u"""
+    Освобождение блокировки шаблона после закрытия окна редактирования
+    """
+    url = '/release'
+
+    def context_declaration(self):
+        return {
+            'report_id': {'type': 'int', 'required': True, 'default': None},
+        }
+
+    def run(self, request, context):
+        if context.report_id:
+            mutex = CreadocMutex(context.report_id)
+
+            if not mutex.is_free():
+                mutex.release()
+
+        return OperationResult()
 
 
 class CreadocDesignerIframeAction(Action):
@@ -233,6 +270,15 @@ class CreadocDesignerReportDeleteAction(Action):
         }
 
     def run(self, request, context):
+        mutex = CreadocMutex(context.row_id)
+
+        if mutex.is_free():
+            mutex.capture()
+        else:
+            raise ApplicationLogicException(
+                u'Данный шаблон редактируется '
+                u'другим пользователем')
+
         try:
             report = CreadocReport.objects.get(pk=context.row_id)
         except CreadocReport.DoesNotExist:
