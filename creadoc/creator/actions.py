@@ -8,9 +8,11 @@ from django.template import loader, Context
 from m3.actions import (
     ActionPack, Action, PreJsonResult,
     OperationResult, ApplicationLogicException)
+from m3_ext.ui.misc import ExtDataStore
 from m3_ext.ui.results import ExtUIScriptResult
 from creadoc.creator.forms import (
-    DesignerIframeWindow, DesignerReportsListWindow)
+    DesignerIframeWindow, DesignerReportsListWindow,
+    DesignerDataSourcesWindow)
 from creadoc.creator.helpers import redirect_to_action
 from creadoc.creator.mutex import CreadocMutex
 from creadoc.models import CreadocReport
@@ -38,6 +40,7 @@ class CreadocDesignerActionPack(ActionPack):
         self.action_report_save = CreadocDesignerReportSaveAction()
         self.action_report_delete = CreadocDesignerReportDeleteAction()
         self.action_report_release = CreadocDesignerReportRelease()
+        self.action_report_sources = CreadocDesignerDataSourcesListAction()
 
         self.actions.extend([
             self.action_show,
@@ -49,6 +52,7 @@ class CreadocDesignerActionPack(ActionPack):
             self.action_report_save,
             self.action_report_delete,
             self.action_report_release,
+            self.action_report_sources,
         ])
 
     def get_list_url(self):
@@ -89,6 +93,7 @@ class CreadocDesignerShowAction(Action):
         )
         win.save_report_url = self.parent.action_report_save.get_absolute_url()
         win.release_report_url = self.parent.action_report_release.get_absolute_url()  # noqa
+        win.sources_window_url = self.parent.action_report_sources.get_absolute_url()  # noqa
 
         return ExtUIScriptResult(win, context)
 
@@ -152,7 +157,6 @@ class CreadocDesignerIframeAction(Action):
             self.parent.action_report_save.get_absolute_url())
         ctx['template_url'] = template_url
         ctx['variables'] = DSR.variables()
-        ctx['sources'] = DSR.sources()
 
         return HttpResponse(t.render(ctx))
 
@@ -295,3 +299,21 @@ class CreadocDesignerReportDeleteAction(Action):
         report.delete()
 
         return OperationResult()
+
+
+class CreadocDesignerDataSourcesListAction(Action):
+    url = '/data_sources'
+
+    def context_declaration(self):
+        return {
+            'report_id': {'type': 'int', 'required': True},
+        }
+
+    def run(self, request, context):
+        win = DesignerDataSourcesWindow()
+
+        sources = DSR.sources()
+        data = map(lambda x: (x.guid, x.name, x.url), sources)
+        win.grid.set_store(ExtDataStore(data))
+
+        return ExtUIScriptResult(win, context)

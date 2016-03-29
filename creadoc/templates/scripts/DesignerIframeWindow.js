@@ -6,20 +6,22 @@ var reportId = Ext.decode('{{ component.report_id }}');
 var reportSaveUrl = '{{ component.save_report_url }}';
 // url для снятия блокировки с шаблона
 var reportReleaseUrl = '{{ component.release_report_url }}';
+var reportSourcesWindowUrl = '{{ component.sources_window_url }}';
 
 
 // Код клавиши "S"
 var CharCodeS = 19;
 
-// Сохранение шаблона при использовании комбинации клавиш ctrl + shift + S
-iframeWindow.addEventListener('keypress', saveKeyPressHandler);
-win.getEl().dom.addEventListener('keypress', saveKeyPressHandler);
+// Сохранение шаблона при использовании комбинации клавиш ctrl + S
+iframeWindow.addEventListener('keydown', function(e) {
+    if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
 
-function saveKeyPressHandler(e) {
-    if (e.ctrlKey && e.shiftKey && e.charCode == CharCodeS) {
-        saveTemplate();
+        if (e.charCode == CharCodeS) {
+            saveTemplate();
+        }
     }
-}
+});
 
 
 /**
@@ -186,4 +188,26 @@ function showNameChangeDialog(callback) {
             }
         }
     );
+}
+
+
+/**
+ * Отображение окна со списком доступных и подключенных источников данных
+ */
+function openDataSourceWindow() {
+    var request = {
+        url: reportSourcesWindowUrl,
+        params: {'report_id': reportId},
+        success: function(response) {
+            var editWindow = smart_eval(response.responseText);
+            editWindow.on('close', function() {
+                debugger;
+            });
+        },
+        failure: function() {
+            uiAjaxFailMessage.apply(this, arguments);
+        }
+    };
+
+    Ext.Ajax.request(request);
 }

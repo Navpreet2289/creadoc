@@ -1,5 +1,5 @@
 # coding: utf-8
-from m3_ext.ui.containers import ExtPanel, ExtContainer
+from m3_ext.ui.containers import ExtPanel, ExtContainer, ExtForm
 from m3_ext.ui.controls import ExtButton
 from m3_ext.ui.panels import ExtObjectGrid
 from m3_ext.ui.windows import ExtEditWindow, ExtWindow
@@ -53,12 +53,22 @@ class DesignerIframeWindow(ExtEditWindow):
         self.btn_save_as.style = {'float': 'right', 'margin': '4px 10px 0 0'}
         self.btn_save_as.text = u'Сохранить как...'
 
+        self.btn_data_sources = ExtButton()
+        self.btn_data_sources.handler = 'openDataSourceWindow'
+        self.btn_data_sources.style = {
+            'float': 'left',
+            'margin': '4px 0 0 10px',
+        }
+        self.btn_data_sources.text = u'Источники данных'
+
+        # Кнопка загрузки пользовательского шаблона
         self.btn_import = ExtButton()
         self.btn_import.handler = 'Ext.emptyFn'
         self.btn_import.style = {'float': 'left', 'margin': '4px 0 0 10px'}
         self.btn_import.disabled = True
         self.btn_import.text = u'Импорт шаблона'
 
+        # Кнопка выгрузки шаблона
         self.btn_export = ExtButton()
         self.btn_export.handler = 'Ext.emptyFn'
         self.btn_export.style = {'float': 'left', 'margin': '4px 0 0 10px'}
@@ -70,6 +80,7 @@ class DesignerIframeWindow(ExtEditWindow):
         self.bottom_bar.items.extend([
             self.btn_import,
             self.btn_export,
+            self.btn_data_sources,
             self.btn_close,
             self.btn_save,
             self.btn_save_as,
@@ -116,9 +127,6 @@ class DesignerReportsListWindow(ExtWindow):
         self.template_globals = 'scripts/DesignerReportsListWindow.js'
 
         self.grid = self.create_grid()
-        grid_panel = ExtPanel()
-        grid_panel.region = 'center'
-        grid_panel.items.append(self.grid)
 
         self.items.append(self.grid)
 
@@ -134,3 +142,48 @@ class DesignerReportsListWindow(ExtWindow):
         grid.allow_paging = False
 
         return grid
+
+
+class DesignerDataSourcesWindow(ExtEditWindow):
+
+    columns = (
+        {
+            'header': u'Идентификатор',
+            'data_index': 'id',
+            'hidden': True,
+        },
+        {
+            'header': u'Наименование',
+            'data_index': 'name',
+            'sortable': True,
+        },
+        {
+            'header': u'Путь',
+            'data_index': 'url',
+            'sortable': True,
+            'hidden': True,
+        }
+    )
+
+    def __init__(self):
+        super(DesignerDataSourcesWindow, self).__init__()
+
+        self.title = u'Список источников данных'
+        self.width = 800
+        self.height = 500
+        self.modal = True
+        self.layout = 'border'
+
+        self.form = form = ExtForm()
+        form.layout = 'fit'
+        form.region = 'center'
+
+        self.grid = grid = ExtObjectGrid()
+        grid.force_fit = True
+        grid.layout = 'fit'
+        grid.allow_paging = False
+
+        for column in self.columns:
+            grid.add_column(**column)
+
+        self.form.items.append(grid)

@@ -67,12 +67,12 @@
             // Привязка источников данных к шаблону
             report.dictionary.databases.clear();
 
-            {% for source in sources %}
-            var dataSet = new Stimulsoft.System.Data.DataSet('{{ source.name }}');
-            // TODO: Неоптимальная логика
-            dataSet.readJsonFile('{{ source.url }}');
-            report.regData(dataSet.dataSetName, "", dataSet);
-            {% endfor %}
+{#            {% for source in sources %}#}
+{#            var dataSet = new Stimulsoft.System.Data.DataSet('{{ source.name }}');#}
+{#            // TODO: Неоптимальная логика#}
+{#            dataSet.readJsonFile('{{ source.url }}');#}
+{#            report.regData(dataSet.dataSetName, "", dataSet);#}
+{#            {% endfor %}#}
             report.dictionary.synchronize();
 
             // Связывание шаблона и дизайнера

@@ -35,6 +35,7 @@ def register_desktop_menu():
 
 DSR.add_sources(
     source_creator(
+        guid='36346',
         name=u'Сотрудники',
         url=get_action_url(ReportListActionPack, 'action_test_data'),
     ),
