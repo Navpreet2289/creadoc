@@ -5,12 +5,18 @@
 
 Добавление в доступ к отчету
 var variable = new Stimulsoft.Report.Dictionary.StiVariable(
-    'a', // Категория
-    'b', // Наименование
-    'c', // Алиас
-    'd', // Описание
-    'e', // Тип
-    'f', // Значение
+    category: string = String.empty,
+    name: string = String.empty,
+    alias: string = String.empty,
+    description: string = String.empty,
+    typeT: Type = String.getType(),
+    value: string = String.empty,
+    readOnly: boolean = false,
+    initBy: StiVariableInitBy = StiVariableInitBy.Value,
+    requestFromUser: boolean = false,
+    dialogInfo: StiDialogInfo = new StiDialogInfo(),
+    key: string = null,
+    allowUseAsSqlParameter: boolean = false
 )
 report.dictionary.variables.add(variable)
 

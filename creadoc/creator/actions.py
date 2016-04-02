@@ -8,6 +8,7 @@ from django.template import loader, Context
 from m3.actions import (
     ActionPack, Action, PreJsonResult,
     OperationResult, ApplicationLogicException)
+from m3.actions.context import ActionContext
 from m3_ext.ui.misc import ExtDataStore
 from m3_ext.ui.results import ExtUIScriptResult
 from creadoc.creator.forms import (
@@ -15,7 +16,7 @@ from creadoc.creator.forms import (
     DesignerDataSourcesWindow)
 from creadoc.creator.helpers import redirect_to_action
 from creadoc.creator.mutex import CreadocMutex
-from creadoc.models import CreadocReport
+from creadoc.models import CreadocReport, CreadocReportDataSource
 from creadoc.source.registry import DSR
 
 __author__ = 'damirazo <me@damirazo.ru>'
@@ -323,13 +324,18 @@ class CreadocDesignerDataSourceActionPack(ActionPack):
         super(CreadocDesignerDataSourceActionPack, self).__init__()
 
         self.action_list = CreadocDesignerDataSourceListAction()
+        self.action_save = CreadocDesignerDataSourceSaveAction()
 
         self.actions.extend([
             self.action_list,
+            self.action_save,
         ])
 
 
 class CreadocDesignerDataSourceListAction(Action):
+    u"""
+    Окно со списком доступных и подключенных источников данных
+    """
     url = '/list'
 
     def context_declaration(self):
@@ -341,7 +347,54 @@ class CreadocDesignerDataSourceListAction(Action):
         win = DesignerDataSourcesWindow()
 
         sources = DSR.sources()
-        data = map(lambda x: (x.guid, x.name, x.url), sources)
-        win.source_grid.set_store(ExtDataStore(data))
+        plugged_sources = CreadocReportDataSource.objects.filter(
+            report__id=context.report_id
+        ).values_list('source_uid', flat=True)
+
+        plugged = []
+        unplugged = []
+        for row in sources:
+            record = (row.guid, row.group, row.url)
+
+            if row.guid in plugged_sources:
+                plugged.append(record)
+            else:
+                unplugged.append(record)
+
+        win.source_grid.set_store(ExtDataStore(unplugged))
+        win.destination_grid.set_store(ExtDataStore(plugged))
+
+        win.save_url = self.parent.action_save.get_absolute_url()
+
+        if not getattr(win, 'action_context', None):
+            win.action_context = ActionContext()
+
+        win.action_context.report_id = context.report_id
 
         return ExtUIScriptResult(win, context)
+
+
+class CreadocDesignerDataSourceSaveAction(Action):
+    u"""
+    Сохранение списка подключенных источников данных
+    """
+    url = '/save'
+
+    def context_declaration(self):
+        return {
+            'rows': {'type': 'json', 'required': True},
+            'report_id': {'type': 'int', 'required': True},
+        }
+
+    def run(self, request, context):
+        CreadocReportDataSource.objects.filter(
+            report__id=context.report_id
+        ).delete()
+
+        for row in context.rows:
+            record = CreadocReportDataSource()
+            record.report_id = context.report_id
+            record.source_uid = row
+            record.save()
+
+        return OperationResult()

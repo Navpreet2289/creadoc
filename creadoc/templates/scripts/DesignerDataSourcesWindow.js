@@ -1,5 +1,6 @@
 var gridSource = Ext.getCmp('{{ component.source_grid.client_id }}');
 var gridDestination = Ext.getCmp('{{ component.destination_grid.client_id }}');
+var urlSave = '{{ component.save_url | safe }}';
 
 
 /**
@@ -60,12 +61,28 @@ function saveSources() {
     var mask = new Ext.LoadMask(win.body);
     mask.show();
 
+    var rows = [];
+    var fullRows = [];
+    gridDestination.getStore().each(function(row) {
+        rows.push(row.get('id'));
+        fullRows.push([
+            row.get('id'),
+            row.get('name'),
+            row.get('url')
+        ])
+    });
+
     var request = {
-        'url': '',
-        'params': {},
+        'url': urlSave,
+        'params': {
+            'rows': Ext.encode(rows),
+            'report_id': win.actionContextJson['report_id']
+        },
         'success': function(response) {
-            mask.hide();
-            debugger;
+            if (win.fireEvent('afterSaveSources', fullRows)) {
+                mask.hide();
+                win.close(true);
+            }
         },
         'failure': function() {
             mask.hide();

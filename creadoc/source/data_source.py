@@ -8,5 +8,5 @@ class DataSource(object):
     Базовый класс для источника данных
     """
     guid = None
-    name = None
+    group = None
     url = None

@@ -36,7 +36,17 @@ def register_desktop_menu():
 DSR.add_sources(
     source_creator(
         guid='36346',
-        name=u'Сотрудники',
+        group=u'Сотрудники',
         url=get_action_url(ReportListActionPack, 'action_test_data'),
     ),
+    source_creator(
+        guid='23633',
+        group=u'Сотрудники',
+        url=get_action_url(ReportListActionPack, 'action_test_data2'),
+    ),
+    source_creator(
+        guid='62626',
+        group=u'Новая группа',
+        url=get_action_url(ReportListActionPack, 'action_test_data3'),
+    )
 )

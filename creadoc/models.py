@@ -52,3 +52,18 @@ class CreadocReport(models.Model):
         db_table = 'creadoc_report'
         verbose_name = u'Шаблон отчетной формы'
         verbose_name_plural = u'Шаблоны отчетных форм'
+
+
+class CreadocReportDataSource(models.Model):
+    u"""
+    Подключенный к шаблону источник данных
+    """
+    report = models.ForeignKey(
+        to='CreadocReport', verbose_name=u'Отчетная форма')
+    source_uid = models.CharField(
+        max_length=128, verbose_name=u'Идентификатор источника данных')
+
+    class Meta:
+        db_table = 'creadoc_report_data_source'
+        verbose_name = u'Подключенный источник данных'
+        verbose_name_plural = u'Подключенные источники данных'

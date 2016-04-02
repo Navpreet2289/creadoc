@@ -29,10 +29,10 @@ def variable_creator(name, value, category=None, description=None):
     return variable
 
 
-def source_creator(guid, name, url):
+def source_creator(guid, group, url):
     data_source = DataSource()
     data_source.guid = guid
     data_source.url = url
-    data_source.name = name
+    data_source.group = group
 
     return data_source
