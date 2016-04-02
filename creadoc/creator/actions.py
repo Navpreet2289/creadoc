@@ -31,6 +31,9 @@ class CreadocDesignerActionPack(ActionPack):
     def __init__(self):
         super(CreadocDesignerActionPack, self).__init__()
 
+        # Список экшенов
+        # ---------------------------------------------------------------------
+
         self.action_show = CreadocDesignerShowAction()
         self.action_iframe = CreadocDesignerIframeAction()
         self.action_report_list_window = CreadocDesignerReportListAction()
@@ -40,7 +43,6 @@ class CreadocDesignerActionPack(ActionPack):
         self.action_report_save = CreadocDesignerReportSaveAction()
         self.action_report_delete = CreadocDesignerReportDeleteAction()
         self.action_report_release = CreadocDesignerReportRelease()
-        self.action_report_sources = CreadocDesignerDataSourcesListAction()
 
         self.actions.extend([
             self.action_show,
@@ -52,7 +54,15 @@ class CreadocDesignerActionPack(ActionPack):
             self.action_report_save,
             self.action_report_delete,
             self.action_report_release,
-            self.action_report_sources,
+        ])
+
+        # Список сабпаков
+        # ---------------------------------------------------------------------
+
+        self.pack_data_source = CreadocDesignerDataSourceActionPack()
+
+        self.subpacks.extend([
+            self.pack_data_source,
         ])
 
     def get_list_url(self):
@@ -92,8 +102,10 @@ class CreadocDesignerShowAction(Action):
             report_id=context.report_id,
         )
         win.save_report_url = self.parent.action_report_save.get_absolute_url()
-        win.release_report_url = self.parent.action_report_release.get_absolute_url()  # noqa
-        win.sources_window_url = self.parent.action_report_sources.get_absolute_url()  # noqa
+        win.release_report_url = (
+            self.parent.action_report_release.get_absolute_url())
+        win.sources_window_url = (
+            self.parent.pack_data_source.action_list.get_absolute_url())
 
         return ExtUIScriptResult(win, context)
 
@@ -301,8 +313,24 @@ class CreadocDesignerReportDeleteAction(Action):
         return OperationResult()
 
 
-class CreadocDesignerDataSourcesListAction(Action):
-    url = '/data_sources'
+class CreadocDesignerDataSourceActionPack(ActionPack):
+    u"""
+    Работа с источниками данных шаблона
+    """
+    url = '/data-source'
+
+    def __init__(self):
+        super(CreadocDesignerDataSourceActionPack, self).__init__()
+
+        self.action_list = CreadocDesignerDataSourceListAction()
+
+        self.actions.extend([
+            self.action_list,
+        ])
+
+
+class CreadocDesignerDataSourceListAction(Action):
+    url = '/list'
 
     def context_declaration(self):
         return {
@@ -314,6 +342,6 @@ class CreadocDesignerDataSourcesListAction(Action):
 
         sources = DSR.sources()
         data = map(lambda x: (x.guid, x.name, x.url), sources)
-        win.grid.set_store(ExtDataStore(data))
+        win.source_grid.set_store(ExtDataStore(data))
 
         return ExtUIScriptResult(win, context)

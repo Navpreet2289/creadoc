@@ -1,6 +1,8 @@
 # coding: utf-8
-from m3_ext.ui.containers import ExtPanel, ExtContainer, ExtForm
+from m3_ext.ui.containers import ExtPanel, ExtContainer as Cnt
+from m3_ext.ui.containers.containers import ExtToolBar
 from m3_ext.ui.controls import ExtButton
+from m3_ext.ui.icons import Icons
 from m3_ext.ui.panels import ExtObjectGrid
 from m3_ext.ui.windows import ExtEditWindow, ExtWindow
 
@@ -75,7 +77,7 @@ class DesignerIframeWindow(ExtEditWindow):
         self.btn_export.disabled = True
         self.btn_export.text = u'Экспорт шаблона'
 
-        self.bottom_bar = ExtContainer()
+        self.bottom_bar = Cnt()
         self.bottom_bar.height = 30
         self.bottom_bar.items.extend([
             self.btn_import,
@@ -145,6 +147,9 @@ class DesignerReportsListWindow(ExtWindow):
 
 
 class DesignerDataSourcesWindow(ExtEditWindow):
+    u"""
+    Окно выбора и подключения источников данных
+    """
 
     columns = (
         {
@@ -172,18 +177,66 @@ class DesignerDataSourcesWindow(ExtEditWindow):
         self.width = 800
         self.height = 500
         self.modal = True
+        self.template_globals = 'scripts/DesignerDataSourcesWindow.js'
+
         self.layout = 'border'
 
-        self.form = form = ExtForm()
-        form.layout = 'fit'
-        form.region = 'center'
+        self.source_grid = self.create_grid('source')
+        self.source_grid.region = 'west'
+        self.source_grid.width = 390
+        self.source_grid.split = True
 
-        self.grid = grid = ExtObjectGrid()
-        grid.force_fit = True
-        grid.layout = 'fit'
+        self.destination_grid = self.create_grid('destination')
+        self.destination_grid.region = 'center'
+
+        self.items.extend([
+            self.source_grid,
+            self.destination_grid,
+        ])
+
+        self.button_add = ExtButton()
+        self.button_add.text = u'Подключить'
+        self.button_add.icon_cls = Icons.M3_ADD
+        self.button_add.handler = 'plugSource'
+
+        self.button_remove = ExtButton()
+        self.button_remove.text = u'Отключить'
+        self.button_remove.icon_cls = Icons.M3_DELETE
+        self.button_remove.handler = 'unplugSource'
+
+        self.top_bar = ExtToolBar()
+        self.top_bar.items.extend([
+            self.button_add,
+            ExtToolBar.Fill(),
+            self.button_remove,
+        ])
+
+        self.button_submit = ExtButton()
+        self.button_submit.text = u'Сохранить'
+        self.button_submit.width = 80
+        self.button_submit.style = {'float': 'right', 'margin': '4px 10px 0 0'}
+        self.button_submit.handler = 'saveSources'
+
+        self.button_cancel = ExtButton()
+        self.button_cancel.text = u'Отмена'
+        self.button_cancel.width = 80
+        self.button_cancel.style = {'float': 'right', 'margin': '4px 10px 0 0'}
+        self.button_cancel.handler = 'closeWindow'
+
+        self.bottom_bar = Cnt()
+        self.bottom_bar.height = 30
+        self.bottom_bar.items.extend([
+            self.button_cancel,
+            self.button_submit,
+        ])
+
+    def create_grid(self, name):
+        grid = ExtObjectGrid()
+        grid.name = name
         grid.allow_paging = False
+        grid.store.auto_load = False
 
         for column in self.columns:
             grid.add_column(**column)
 
-        self.form.items.append(grid)
+        return grid
