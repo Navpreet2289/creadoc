@@ -1,5 +1,10 @@
 var gridSource = Ext.getCmp('{{ component.source_grid.client_id }}');
 var gridDestination = Ext.getCmp('{{ component.destination_grid.client_id }}');
+var bottomBar = Ext.getCmp('{{ component.bottom_bar.client_id }}');
+var progressBar = new Ext.ProgressBar({text: 'Импорт источников...'});
+progressBar.render('{{ component.bottom_bar.client_id }}');
+
+
 var urlSave = '{{ component.save_url | safe }}';
 
 
@@ -79,7 +84,19 @@ function saveSources() {
             'report_id': win.actionContextJson['report_id']
         },
         'success': function(response) {
-            if (win.fireEvent('afterSaveSources', fullRows)) {
+            var total = fullRows.length;
+            var current = 1;
+
+            var callback = function() {
+                progressBar.updateProgress(
+                    current/total, 'Загрузка источников: ' + current + ' из ' + total
+                );
+                current++;
+            };
+
+            var result = win.fireEvent('afterSaveSources', fullRows, callback);
+
+            if (result) {
                 mask.hide();
                 win.close(true);
             }

@@ -48,7 +48,13 @@ function getTemplateEvent(callback) {
 }
 
 
-function getDataSourceEvent(callback, rows) {
+/**
+ * Формирование события на обновление списка источников данных
+ * @param callback
+ * @param rows
+ * @returns {CustomEvent}
+ */
+function getDataSourceEvent(rows, callback) {
     return new CustomEvent('refreshSources', {
         bubbles : true,
         cancelable : true,
@@ -228,10 +234,8 @@ function openDataSourceWindowRequest(reportId) {
         params: {'report_id': reportId},
         success: function(response) {
             var editWindow = smart_eval(response.responseText);
-            editWindow.on('afterSaveSources', function(rows) {
-                iframeWindow.dispatchEvent(getDataSourceEvent(function() {
-                    debugger;
-                }, rows));
+            editWindow.on('afterSaveSources', function(rows, callback) {
+                iframeWindow.dispatchEvent(getDataSourceEvent(rows, callback));
                 return true;
             });
         },

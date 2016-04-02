@@ -224,8 +224,12 @@ class DesignerDataSourcesWindow(ExtEditWindow):
         self.button_cancel.handler = 'closeWindow'
 
         self.bottom_bar = Cnt()
-        self.bottom_bar.height = 30
-        self.bottom_bar.items.extend([
+        self.bottom_bar.height = 20
+
+        self.footer_bar = Cnt()
+        self.footer_bar.height = 30
+
+        self.footer_bar.items.extend([
             self.button_cancel,
             self.button_submit,
         ])
