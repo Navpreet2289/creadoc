@@ -37,8 +37,8 @@
             options.dictionary.dataSourcesPermissions = permission.View;
             options.dictionary.dataConnectionsPermissions = permission.View;
             options.dictionary.dataColumnsPermissions = permission.View;
-            options.dictionary.dataRelationsPermissions = permission.View;
-            options.dictionary.businessObjectsPermissions = permission.View;
+            options.dictionary.dataRelationsPermissions = permission.None;
+            options.dictionary.businessObjectsPermissions = permission.None;
             options.dictionary.variablesPermissions = permission.View;
 
             // Формирование экземпляра дизайнера
@@ -53,9 +53,11 @@
             try {
                 report.loadFile(templatePath);
             } catch (error) {
-                alert("Не удалось загрузить шаблон " +
-                        templatePath +
-                        ", возможно он отсутствует.");
+                alert(
+                    "Не удалось загрузить шаблон " +
+                    templatePath +
+                    ", возможно он отсутствует."
+                );
 
                 return;
             }
@@ -73,28 +75,61 @@
                     // Описание
                     '{{ variable.description }}',
                     // Тип
-                    String,
+                    variableTypeGetter('{{ variable.type | safe }}'),
                     // Значение
-                    '{{ variable.value }}'
+                    '{{ variable.value }}',
+                    true
                 )
             );
             {% endfor %}
 
+            // Очищаем от "хвостов" соединений и источников,
+            // они нам только помешают, так как создают лишь видимость присутствия
             report.dictionary.databases.clear();
             report.dictionary.dataSources.clear();
 
+            // Привязка источников данных к шаблону
             {% for source in sources %}
             var dataSet = new Stimulsoft.System.Data.DataSet();
             dataSet.readJsonFile('{{ source.url | safe }}');
             report.regData('{{ source.group }}', '', dataSet);
             {% endfor %}
 
+            // Синхронизация источников данных
+            // TODO: Довольно медленная операция,
+            // но без нее не будет работать предпросмотр
             report.dictionary.synchronize();
 
             // Связывание шаблона и дизайнера
             designer.report = report;
             // Рендерим дизайнер в элемент с указанным идентификатором
             designer.renderHtml("designerContent");
+        }
+
+        /**
+         * Получение типа переменной из глобальной области видимости
+         */
+        function variableTypeGetter(s) {
+            var value;
+            var index = 0;
+            var segments = s.split('.');
+
+            while (true) {
+                if (!value) {
+                    value = window;
+                }
+
+                var key = segments[index];
+                value = value[key];
+
+                index++;
+                // На всякий случай пресечем также возможность зацикливания
+                if (index >= segments.length || index > 5) {
+                    break;
+                }
+            }
+
+            return value;
         }
 
         // Обработка логики сохранения шаблона

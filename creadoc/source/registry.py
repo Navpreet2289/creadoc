@@ -1,8 +1,8 @@
 # coding: utf-8
 from operator import attrgetter
-
 from creadoc.models import CreadocReportDataSource
-from creadoc.source.exceptions import DuplicateVariableException
+from creadoc.source.exceptions import (
+    DuplicateVariableException, DuplicateDataSourceException)
 
 __author__ = 'damirazo <me@damirazo.ru>'
 
@@ -16,6 +16,7 @@ class DataSourceRegistry(object):
     __variables = []
     # Список зарегистрированных источников данных
     __sources = []
+    __source_groups = {}
 
     @classmethod
     def add_variables(cls, *variables):
@@ -40,14 +41,35 @@ class DataSourceRegistry(object):
 
     @classmethod
     def variables(cls):
+        u"""
+        Перечисление всех зарегистрированных переменных
+        """
         return cls.__variables
 
     @classmethod
     def add_sources(cls, *sources):
-        cls.__sources.extend(sources)
+        u"""
+        Регистрация источников данных в реестре
+        :param sources: Перечисление источников данных
+        """
+        for source in sources:
+            if source.group in cls.__source_groups:
+                raise DuplicateDataSourceException((
+                    u'Источник данных с именем "{}" '
+                    u'уже зарегистрирован в реестре в источнике данных "{}"'
+                ).format(
+                    source.group,
+                    cls.__source_groups[source.group].__class__.__name__,
+                ))
+
+            cls.__sources.append(source)
+            cls.__source_groups[source.group] = source
 
     @classmethod
     def sources(cls):
+        u"""
+        Перечисление всех зарегистрированных источников данных
+        """
         return cls.__sources
 
     @classmethod

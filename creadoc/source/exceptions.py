@@ -12,3 +12,9 @@ class DuplicateVariableException(BaseDataSourceException):
     u"""
     Выявление дубликата переменной
     """
+
+
+class DuplicateDataSourceException(BaseDataSourceException):
+    u"""
+    Выявление дубликата источника данных
+    """

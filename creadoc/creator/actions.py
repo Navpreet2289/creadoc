@@ -18,6 +18,7 @@ from creadoc.creator.helpers import redirect_to_action
 from creadoc.creator.mutex import CreadocMutex
 from creadoc.models import CreadocReport, CreadocReportDataSource
 from creadoc.source.registry import DSR
+from creadoc.source.variable import VariableType
 
 __author__ = 'damirazo <me@damirazo.ru>'
 

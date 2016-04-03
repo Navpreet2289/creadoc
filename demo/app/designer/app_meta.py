@@ -5,6 +5,7 @@ from m3_users import metaroles, GENERIC_USER
 from creadoc.creator.actions import CreadocDesignerActionPack
 from creadoc.source.helpers import variable_creator
 from creadoc.source.registry import DSR
+from creadoc.source.variable import VariableType
 from demo.app.helpers import find_pack
 
 __author__ = 'damirazo <me@damirazo.ru>'
@@ -28,8 +29,15 @@ def register_desktop_menu():
 
 DSR.add_variables(
     variable_creator(
-        u'Приветствие', u'Привет, Мир!',
+        'Hello',
+        u'Привет, Мир!',
         description=u'Тестовое описание переменной'),
-    variable_creator(u'НаименованиеУчреждения', u'Касатка', category=u'ЗиК'),
-    variable_creator(u'РабочаяДата', u'01.01.2012', category=u'ЗиК'),
+    variable_creator(
+        'EnterpriseName',
+        u'Касатка',
+        category=u'ЗиК'),
+    variable_creator(
+        'OperationDate',
+        '01.01.2012',
+        category=u'ЗиК', v_type=VariableType.DATETIME),
 )
