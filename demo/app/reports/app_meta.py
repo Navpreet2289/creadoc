@@ -6,7 +6,8 @@ from creadoc.source.helpers import source_creator
 from creadoc.source.registry import DSR
 from demo.app.helpers import find_pack, get_action_url
 from demo.app import controller
-from demo.app.reports.actions import ReportListActionPack
+from demo.app.reports.actions import (
+    ReportListActionPack, ExampleDataSourceActionPack)
 
 __author__ = 'damirazo <me@damirazo.ru>'
 
@@ -37,16 +38,16 @@ DSR.add_sources(
     source_creator(
         guid='36346',
         group=u'Список сотрудников',
-        url=get_action_url(ReportListActionPack, 'action_test_data'),
+        url=get_action_url(ExampleDataSourceActionPack, 'action_test_data'),
     ),
     source_creator(
         guid='23633',
         group=u'Список сотрудников (новый)',
-        url=get_action_url(ReportListActionPack, 'action_test_data2'),
+        url=get_action_url(ExampleDataSourceActionPack, 'action_test_data2'),
     ),
     source_creator(
         guid='62626',
         group=u'Работающие сотрудники',
-        url=get_action_url(ReportListActionPack, 'action_test_data3'),
+        url=get_action_url(ExampleDataSourceActionPack, 'action_test_data3'),
     )
 )

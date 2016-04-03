@@ -1,7 +1,6 @@
 # coding: utf-8
 import random
 import string
-
 from m3.actions import ActionPack, Action, OperationResult, PreJsonResult
 
 __author__ = 'damirazo <me@damirazo.ru>'
@@ -18,16 +17,8 @@ class ReportListActionPack(ActionPack):
         super(ReportListActionPack, self).__init__()
 
         self.action_rows = ReportListRowsAction()
-        # TODO: Тестовые данные
-        self.action_test_data = ReportTestDataAction()
-        self.action_test_data2 = ReportTestData2Action()
-        self.action_test_data3 = ReportTestData3Action()
-
         self.actions.extend([
             self.action_rows,
-            self.action_test_data,
-            self.action_test_data2,
-            self.action_test_data3,
         ])
 
     def get_list_url(self):
@@ -42,6 +33,26 @@ class ReportListRowsAction(Action):
 
     def run(self, request, context):
         return OperationResult(message=u'Окно со списком отчетов')
+
+
+class ExampleDataSourceActionPack(ActionPack):
+    u"""
+    Пак с демонстрационными источниками данных
+    """
+    url = '/examples'
+
+    def __init__(self):
+        super(ExampleDataSourceActionPack, self).__init__()
+
+        self.action_test_data = ReportTestDataAction()
+        self.action_test_data2 = ReportTestData2Action()
+        self.action_test_data3 = ReportTestData3Action()
+
+        self.actions.extend([
+            self.action_test_data,
+            self.action_test_data2,
+            self.action_test_data3,
+        ])
 
 
 class ReportTestDataAction(Action):
