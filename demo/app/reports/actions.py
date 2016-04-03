@@ -52,15 +52,15 @@ class ReportTestDataAction(Action):
 
         for x in xrange(1, 5001):
             result.append({
-                u'ФИО': u''.join(map(
+                'fullname': ''.join(map(
                     lambda x: random.choice(string.ascii_lowercase),
                     xrange(random.randint(3, 10)),
                 )),
-                u'Зарплата': random.randint(0, 1000),
+                'salary': random.randint(0, 1000),
             })
 
         return PreJsonResult({
-            u'Сотрудник2': result,
+            'Employee': result,
         })
 
 
@@ -72,15 +72,15 @@ class ReportTestData2Action(Action):
 
         for x in xrange(1, 5001):
             result.append({
-                u'ФИО': u''.join(map(
+                'fullname': ''.join(map(
                     lambda x: random.choice(string.ascii_lowercase),
                     xrange(random.randint(3, 10)),
                 )),
-                u'Зарплата': random.randint(0, 1000),
+                'salary': random.randint(0, 1000),
             })
 
         return PreJsonResult({
-            u'Сотрудник': result,
+            'Employee': result,
         })
 
 
@@ -92,13 +92,13 @@ class ReportTestData3Action(Action):
 
         for x in xrange(1, 5001):
             result.append({
-                u'ФИО': u''.join(map(
+                'fullname': ''.join(map(
                     lambda x: random.choice(string.ascii_lowercase),
                     xrange(random.randint(3, 10)),
                 )),
-                u'Зарплата': random.randint(0, 1000),
+                'salary': random.randint(0, 1000),
             })
 
         return PreJsonResult({
-            u'Сотрудник3': result,
+            'Employee': result,
         })

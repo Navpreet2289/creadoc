@@ -170,6 +170,7 @@ class CreadocDesignerIframeAction(Action):
             self.parent.action_report_save.get_absolute_url())
         ctx['template_url'] = template_url
         ctx['variables'] = DSR.variables()
+        ctx['sources'] = DSR.connected_sources(context.report_id)
 
         return HttpResponse(t.render(ctx))
 
@@ -282,36 +283,50 @@ class CreadocDesignerReportDeleteAction(Action):
     url = '/delete'
 
     def context_declaration(self):
+        row_id_type = lambda x: map(lambda y: y.strip(), x.split(','))
+
         return {
-            'row_id': {'type': 'int', 'required': True},
+            'row_id': {'type': row_id_type, 'required': True},
         }
 
+    @transaction.atomic
     def run(self, request, context):
-        mutex = CreadocMutex(context.row_id)
+        deleted = 0
+        protected = 0
 
-        if mutex.is_free():
-            mutex.capture()
+        for row_id in context.row_id:
+            mutex = CreadocMutex(row_id)
+
+            if not mutex.is_free():
+                protected += 1
+                continue
+
+            try:
+                report = CreadocReport.objects.get(pk=row_id)
+            except CreadocReport.DoesNotExist:
+                raise ApplicationLogicException((
+                    u'Шаблон с id={} отсутствует!'
+                ).format(row_id))
+
+            # Пробуем удалить шаблон. Если отсутствует, то пропускаем.
+            try:
+                os.remove(report.path)
+            except OSError:
+                pass
+
+            report.delete()
+
+            deleted += 1
+
+        if protected:
+            result = OperationResult(message=(
+                u'Удалено записей: {}<br>'
+                u'Используется другими пользователями: {}'
+            ).format(deleted, protected))
         else:
-            raise ApplicationLogicException(
-                u'Данный шаблон редактируется '
-                u'другим пользователем')
+            result = OperationResult()
 
-        try:
-            report = CreadocReport.objects.get(pk=context.row_id)
-        except CreadocReport.DoesNotExist:
-            raise ApplicationLogicException((
-                u'Шаблон с id={} отсутствует!'
-            ).format(context.row_id))
-
-        # Пробуем удалить шаблон. Если отсутствует, то пропускаем.
-        try:
-            os.remove(report.path)
-        except OSError:
-            pass
-
-        report.delete()
-
-        return OperationResult()
+        return result
 
 
 class CreadocDesignerDataSourceActionPack(ActionPack):

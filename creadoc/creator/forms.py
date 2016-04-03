@@ -53,7 +53,7 @@ class DesignerIframeWindow(ExtEditWindow):
         self.btn_save_as = ExtButton()
         self.btn_save_as.handler = 'saveTemplateAs'
         self.btn_save_as.style = {'float': 'right', 'margin': '4px 10px 0 0'}
-        self.btn_save_as.text = u'Сохранить как...'
+        self.btn_save_as.text = u'Скопировать'
 
         self.btn_data_sources = ExtButton()
         self.btn_data_sources.handler = 'openDataSourceWindow'
@@ -121,8 +121,8 @@ class DesignerReportsListWindow(ExtWindow):
         super(DesignerReportsListWindow, self).__init__()
 
         self.title = u'Список печатных форм'
-        self.width = 400
-        self.height = 300
+        self.width = 800
+        self.height = 500
         self.layout = 'border'
         self.maximizable = True
         self.minimizable = True

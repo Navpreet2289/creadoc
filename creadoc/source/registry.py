@@ -1,5 +1,7 @@
 # coding: utf-8
 from operator import attrgetter
+
+from creadoc.models import CreadocReportDataSource
 from creadoc.source.exceptions import DuplicateVariableException
 
 __author__ = 'damirazo <me@damirazo.ru>'
@@ -12,6 +14,7 @@ class DataSourceRegistry(object):
 
     # Список зарегистрированных переменных
     __variables = []
+    # Список зарегистрированных источников данных
     __sources = []
 
     @classmethod
@@ -46,6 +49,25 @@ class DataSourceRegistry(object):
     @classmethod
     def sources(cls):
         return cls.__sources
+
+    @classmethod
+    def connected_sources(cls, report_id):
+        u"""
+        Список всех подключенных к шаблону с указанным id источников данных
+        Для нового шаблона список будет пустым
+        :param report_id: Идентификатор шаблона
+        :return:
+        """
+        result = []
+        connected_source_ids = CreadocReportDataSource.objects.filter(
+            report__id=report_id
+        ).values_list('source_uid', flat=True)
+
+        for source in cls.__sources:
+            if source.guid in connected_source_ids:
+                result.append(source)
+
+        return result
 
 
 DSR = DataSourceRegistry

@@ -50,15 +50,14 @@ function getTemplateEvent(callback) {
 
 /**
  * Формирование события на обновление списка источников данных
- * @param callback
  * @param rows
  * @returns {CustomEvent}
  */
-function getDataSourceEvent(rows, callback) {
+function getDataSourceEvent(rows) {
     return new CustomEvent('refreshSources', {
         bubbles : true,
         cancelable : true,
-        detail: {'callback': callback, 'rows': rows}
+        detail: {'rows': rows}
     });
 }
 
@@ -234,8 +233,8 @@ function openDataSourceWindowRequest(reportId) {
         params: {'report_id': reportId},
         success: function(response) {
             var editWindow = smart_eval(response.responseText);
-            editWindow.on('afterSaveSources', function(rows, callback) {
-                iframeWindow.dispatchEvent(getDataSourceEvent(rows, callback));
+            editWindow.on('afterSaveSources', function(rows) {
+                iframeWindow.dispatchEvent(getDataSourceEvent(rows));
                 return true;
             });
         },

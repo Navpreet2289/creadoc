@@ -33,6 +33,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'demo.app.middlewares.FakeUserMiddleware',
+    'demo.app.middlewares.PrettifyErrorMiddleware',
 )
 
 ROOT_URLCONF = 'demo.urls'

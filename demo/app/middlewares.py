@@ -9,3 +9,9 @@ class FakeUserMiddleware(object):
     def process_request(self, request):
         if not hasattr(request, 'user'):
             request.user = AnonymousUser()
+
+
+class PrettifyErrorMiddleware(object):
+
+    def process_request(self, request):
+        request.is_ajax = lambda *x: False

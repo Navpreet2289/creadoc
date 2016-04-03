@@ -80,10 +80,16 @@
             );
             {% endfor %}
 
-            debugger;
-            designer.onPreviewReport = function() {
-                debugger;
-            };
+            report.dictionary.databases.clear();
+            report.dictionary.dataSources.clear();
+
+            {% for source in sources %}
+            var dataSet = new Stimulsoft.System.Data.DataSet();
+            dataSet.readJsonFile('{{ source.url | safe }}');
+            report.regData('{{ source.group }}', '', dataSet);
+            {% endfor %}
+
+            report.dictionary.synchronize();
 
             // Связывание шаблона и дизайнера
             designer.report = report;
@@ -102,7 +108,7 @@
         // Обновление списка подключенных источников данных
         window.addEventListener('refreshSources', function(e) {
             if (report) {
-                refreshSources(e.detail.rows);
+                refreshSources(e.detail.rows, e.detail.callback);
             }
         });
 
@@ -121,8 +127,10 @@
                 report.regData(row[1], '', dataSet);
             }
 
-            report.dictionary.synchronize();
-            designer.jsObject.assignReport(report);
+            if (rows) {
+                report.dictionary.synchronize();
+                designer.jsObject.assignReport(report);
+            }
         }
 
         // Инициализация дизайнера
