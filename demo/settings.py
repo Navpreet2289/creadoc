@@ -27,6 +27,7 @@ INSTALLED_APPS = (
     'demo.app',
     'demo.app.designer',
     'demo.app.reports',
+    'demo.app.example',
 )
 
 MIDDLEWARE_CLASSES = (

@@ -11,11 +11,11 @@ from m3.actions import (
 from m3.actions.context import ActionContext
 from m3_ext.ui.misc import ExtDataStore
 from m3_ext.ui.results import ExtUIScriptResult
-from creadoc.creator.forms import (
+from creadoc.designer.forms import (
     DesignerIframeWindow, DesignerReportsListWindow,
     DesignerDataSourcesWindow)
-from creadoc.creator.helpers import redirect_to_action
-from creadoc.creator.mutex import CreadocMutex
+from creadoc.designer.helpers import redirect_to_action
+from creadoc.designer.mutex import CreadocMutex
 from creadoc.models import CreadocReport, CreadocReportDataSource
 from creadoc.source.registry import DSR
 

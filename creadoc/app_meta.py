@@ -1,7 +1,7 @@
 # coding: utf-8
 from django.conf.urls import patterns
 from creadoc import controller
-from creadoc.creator.actions import CreadocDesignerActionPack
+from creadoc.designer.actions import CreadocDesignerActionPack
 
 __author__ = 'damirazo <me@damirazo.ru>'
 

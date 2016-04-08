@@ -2,10 +2,7 @@
 from m3_ext.ui.app_ui import (
     DesktopShortcut, DesktopLoader)
 from m3_users import metaroles, GENERIC_USER
-from creadoc.creator.actions import CreadocDesignerActionPack
-from creadoc.source.helpers import variable_creator
-from creadoc.source.registry import DSR
-from creadoc.source.variable import VariableType
+from creadoc.designer.actions import CreadocDesignerActionPack
 from demo.app.helpers import find_pack
 
 __author__ = 'damirazo <me@damirazo.ru>'
@@ -25,19 +22,3 @@ def register_desktop_menu():
         place=DesktopLoader.TOPTOOLBAR,
         element=designer_root,
     )
-
-
-DSR.add_variables(
-    variable_creator(
-        'Hello',
-        u'Привет, Мир!',
-        description=u'Тестовое описание переменной'),
-    variable_creator(
-        'EnterpriseName',
-        u'Касатка',
-        category=u'ЗиК'),
-    variable_creator(
-        'OperationDate',
-        '01.01.2012',
-        category=u'ЗиК', v_type=VariableType.DATETIME),
-)
