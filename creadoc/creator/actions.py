@@ -18,7 +18,6 @@ from creadoc.creator.helpers import redirect_to_action
 from creadoc.creator.mutex import CreadocMutex
 from creadoc.models import CreadocReport, CreadocReportDataSource
 from creadoc.source.registry import DSR
-from creadoc.source.variable import VariableType
 
 __author__ = 'damirazo <me@damirazo.ru>'
 
@@ -166,11 +165,16 @@ class CreadocDesignerIframeAction(Action):
         t = loader.get_template('creadoc_designer.html')
 
         ctx = Context()
+        # url до папки с сохраненными файлами шаблонов
         ctx['reports_url'] = settings.CREADOC_REPORTS_URL
+        # url до экшена сохранения шаблона
         ctx['report_save_url'] = (
             self.parent.action_report_save.get_absolute_url())
+        # url до текущего шаблона
         ctx['template_url'] = template_url
+        # Перечисление шаблонных переменных
         ctx['variables'] = DSR.variables()
+        # Перечисление подключенных источников данных
         ctx['sources'] = DSR.connected_sources(context.report_id)
 
         return HttpResponse(t.render(ctx))
@@ -184,6 +188,7 @@ class CreadocDesignerReportListAction(Action):
 
     def run(self, request, context):
         win = DesignerReportsListWindow()
+
         win.grid.action_data = self.parent.action_report_rows
         win.grid.action_new = self.parent.action_report_new
         win.grid.action_edit = self.parent.action_report_edit

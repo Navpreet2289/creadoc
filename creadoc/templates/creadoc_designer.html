@@ -96,8 +96,6 @@
             {% endfor %}
 
             // Синхронизация источников данных
-            // TODO: Довольно медленная операция,
-            // но без нее не будет работать предпросмотр
             report.dictionary.synchronize();
 
             // Связывание шаблона и дизайнера
@@ -158,14 +156,16 @@
             for (var i = 0; i < rows.length; i++) {
                 var row = rows[i];
                 var dataSet = new Stimulsoft.System.Data.DataSet();
+
                 dataSet.readJsonFile(row[2]);
                 report.regData(row[1], '', dataSet);
             }
 
-            if (rows) {
+            if (rows.length) {
                 report.dictionary.synchronize();
-                designer.jsObject.assignReport(report);
             }
+
+            designer.jsObject.assignReport(report);
         }
 
         // Инициализация дизайнера

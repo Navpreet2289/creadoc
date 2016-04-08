@@ -15,6 +15,7 @@ __author__ = 'damirazo <me@damirazo.ru>'
 def register_actions():
     controller.action_controller.extend_packs([
         ReportListActionPack(),
+        ExampleDataSourceActionPack(),
     ])
 
 
