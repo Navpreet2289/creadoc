@@ -162,7 +162,7 @@ class CreadocDesignerIframeAction(Action):
 
             template_url = report.url
 
-        t = loader.get_template('creadoc_designer.html')
+        t = loader.get_template('designer.html')
 
         ctx = Context()
         # url до папки с сохраненными файлами шаблонов
