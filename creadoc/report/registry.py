@@ -1,13 +1,17 @@
 # coding: utf-8
 from operator import attrgetter
+
+from m3.actions import ControllerCache
+
 from creadoc.models import CreadocReportDataSource
-from creadoc.source.exceptions import (
+from creadoc.report.actions import CreadocDataSourceActionPack
+from creadoc.report.exceptions import (
     DuplicateVariableException, DuplicateDataSourceException)
 
 __author__ = 'damirazo <me@damirazo.ru>'
 
 
-class DataSourceRegistry(object):
+class CreadocRegistry(object):
     u"""
     Реестр источников данных
     """
@@ -16,7 +20,10 @@ class DataSourceRegistry(object):
     __variables = []
     # Список зарегистрированных источников данных
     __sources = []
-    __source_groups = {}
+    __source_aliases = {}
+    __source_guids = set()
+
+    __creadoc_data_source_pack = None
 
     @classmethod
     def add_variables(cls, *variables):
@@ -52,18 +59,28 @@ class DataSourceRegistry(object):
         Регистрация источников данных в реестре
         :param sources: Перечисление источников данных
         """
+        pack = cls.__creadoc_data_source_pack
+        if pack is None:
+            pack = ControllerCache.find_pack(CreadocDataSourceActionPack)
+            cls.__creadoc_data_source_pack = pack
+
         for source in sources:
-            if source.group in cls.__source_groups:
+            action = source()
+            alias = action.alias
+
+            if alias in cls.__source_aliases:
                 raise DuplicateDataSourceException((
                     u'Источник данных с именем "{}" '
                     u'уже зарегистрирован в реестре в источнике данных "{}"'
                 ).format(
-                    source.group,
-                    cls.__source_groups[source.group].__class__.__name__,
+                    alias, cls.__source_aliases[alias].__class__.__name__,
                 ))
 
-            cls.__sources.append(source)
-            cls.__source_groups[source.group] = source
+            cls.__sources.append(action)
+            cls.__source_aliases[alias] = action
+
+            # Расширение списка экшенов для базового пака происходит в рантайме
+            pack.add_action_in_runtime(action)
 
     @classmethod
     def sources(cls):
@@ -73,13 +90,26 @@ class DataSourceRegistry(object):
         return cls.__sources
 
     @classmethod
-    def connected_sources(cls, report_id):
+    def connected_sources(cls, report_id, params=None):
         u"""
         Список всех подключенных к шаблону с указанным id источников данных
         Для нового шаблона список будет пустым
         :param report_id: Идентификатор шаблона
+        :param params: Настроечные параметры для источников данных
         :return:
         """
+
+        def _wrap_run(fn):
+            u"""
+            Обертка над методом run экшена.
+            Дополняет контекст настроечными параметрами.
+            """
+            def _wrapper(request, context, *args, **kwargs):
+                context.params = params
+
+                return fn(request, context, *args, **kwargs)
+            return _wrapper
+
         result = []
         connected_source_ids = CreadocReportDataSource.objects.filter(
             report__id=report_id
@@ -87,9 +117,12 @@ class DataSourceRegistry(object):
 
         for source in cls.__sources:
             if source.guid in connected_source_ids:
+                if params is not None:
+                    source.run = _wrap_run(source.run)
+
                 result.append(source)
 
         return result
 
 
-DSR = DataSourceRegistry
+CR = CreadocRegistry

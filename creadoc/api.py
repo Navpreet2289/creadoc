@@ -15,11 +15,3 @@ def all_reports(on_date=None):
         q &= Q(created_at=on_date)
 
     return CreadocReport.objects.filter(q)
-
-
-def show_viewer_handler():
-    pass
-
-
-def print_report_handler():
-    pass

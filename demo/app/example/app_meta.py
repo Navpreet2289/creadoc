@@ -1,41 +1,17 @@
 # coding: utf-8
-from creadoc.source.helpers import source_creator, variable_creator
-from creadoc.source.registry import DSR
-from creadoc.source.variable import VariableType
-from demo.app import controller
-from demo.app.example.actions import ExampleDataSourceActionPack
-from demo.app.helpers import get_action_url
+from creadoc.report.helpers import variable_creator
+from creadoc.report.registry import CR
+from creadoc.report.variable import VariableType
+from demo.app.example.actions import ReportTestData4Action
 
 
-def register_actions():
-    controller.action_controller.extend_packs([
-        ExampleDataSourceActionPack(),
-    ])
-
-
-def get_url(action_name):
-    return get_action_url(ExampleDataSourceActionPack, action_name)
-
-
-# Регистрация источников данных
-DSR.add_sources(
-    source_creator(
-        guid='36346',
-        group=u'Список сотрудников',
-        url=get_url('action_test_data')),
-    source_creator(
-        guid='23633',
-        group=u'Список сотрудников (новый)',
-        url=get_url('action_test_data2')),
-    source_creator(
-        guid='62626',
-        group=u'Работающие сотрудники',
-        url=get_url('action_test_data3'))
+CR.add_sources(
+    ReportTestData4Action,
 )
 
 
 # Регистрация шаблонных переменных
-DSR.add_variables(
+CR.add_variables(
     variable_creator(
         'Hello',
         u'Привет, Мир!',

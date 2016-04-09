@@ -17,7 +17,7 @@ from creadoc.designer.forms import (
 from creadoc.designer.helpers import redirect_to_action
 from creadoc.designer.mutex import CreadocMutex
 from creadoc.models import CreadocReport, CreadocReportDataSource
-from creadoc.source.registry import DSR
+from creadoc.report.registry import CR
 
 __author__ = 'damirazo <me@damirazo.ru>'
 
@@ -173,9 +173,9 @@ class CreadocDesignerIframeAction(Action):
         # url до текущего шаблона
         ctx['template_url'] = template_url
         # Перечисление шаблонных переменных
-        ctx['variables'] = DSR.variables()
+        ctx['variables'] = CR.variables()
         # Перечисление подключенных источников данных
-        ctx['sources'] = DSR.connected_sources(context.report_id)
+        ctx['sources'] = CR.connected_sources(context.report_id)
 
         return HttpResponse(t.render(ctx))
 
@@ -367,7 +367,7 @@ class CreadocDesignerDataSourceListAction(Action):
     def run(self, request, context):
         win = DesignerDataSourcesWindow()
 
-        sources = DSR.sources()
+        sources = CR.sources()
         plugged_sources = CreadocReportDataSource.objects.filter(
             report__id=context.report_id
         ).values_list('source_uid', flat=True)
@@ -375,7 +375,7 @@ class CreadocDesignerDataSourceListAction(Action):
         plugged = []
         unplugged = []
         for row in sources:
-            record = (row.guid, row.group, row.url)
+            record = (row.guid, row.alias, row.get_absolute_url())
 
             if row.guid in plugged_sources:
                 plugged.append(record)

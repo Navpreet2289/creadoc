@@ -91,8 +91,8 @@
             // Привязка источников данных к шаблону
             {% for source in sources %}
             var dataSet = new Stimulsoft.System.Data.DataSet();
-            dataSet.readJsonFile('{{ source.url | safe }}');
-            report.regData('{{ source.group }}', '', dataSet);
+            dataSet.readJsonFile('{{ source.get_absolute_url | safe }}');
+            report.regData('{{ source.alias }}', '', dataSet);
             {% endfor %}
 
             // Синхронизация источников данных
@@ -141,7 +141,7 @@
         // Обновление списка подключенных источников данных
         window.addEventListener('refreshSources', function(e) {
             if (report) {
-                refreshSources(e.detail.rows, e.detail.callback);
+                refreshSources(e.detail.rows);
             }
         });
 

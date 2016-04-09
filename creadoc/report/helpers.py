@@ -1,7 +1,6 @@
 # coding: utf-8
-from creadoc.source.constants import BASE_CATEGORY
-from creadoc.source.data_source import DataSource
-from creadoc.source.variable import Variable, VariableType
+from creadoc.report.constants import BASE_CATEGORY
+from creadoc.report.variable import Variable, VariableType
 
 __author__ = 'damirazo <me@damirazo.ru>'
 
@@ -29,12 +28,3 @@ def variable_creator(name, value, category=None, description=None, v_type=None):
         variable.value = lambda: value
 
     return variable
-
-
-def source_creator(guid, group, url):
-    data_source = DataSource()
-    data_source.guid = guid
-    data_source.url = url
-    data_source.group = group
-
-    return data_source

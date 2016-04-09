@@ -1,7 +1,9 @@
 # coding: utf-8
-from m3.actions import ActionPack, Action, OperationResult
+from m3.actions import ActionPack, Action
 from m3.actions.results import PreJsonResult
 from m3_ext.ui.results import ExtUIScriptResult
+from creadoc.viewer.actions import CreadocViewerActionPack
+from demo.app.helpers import find_pack
 from demo.app.reports.forms import RegistryListWindow
 
 __author__ = 'damirazo <me@damirazo.ru>'
@@ -30,18 +32,24 @@ class ReportListActionPack(ActionPack):
 
 
 class ReportListWindowAction(Action):
+    u"""
+    Окно с тестовым списком записей
+    """
     url = '/list'
 
     def run(self, request, context):
         win = RegistryListWindow()
         win.grid.action_data = self.parent.action_rows
 
+        viewer_pack = find_pack(CreadocViewerActionPack)
+        win.viewer_url = viewer_pack.action_show.get_absolute_url()
+
         return ExtUIScriptResult(win, context)
 
 
 class ReportListRowsAction(Action):
     u"""
-    Формирование списка отчетов
+    Формирование тестового списка записей
     """
     url = '/rows'
 
@@ -50,6 +58,7 @@ class ReportListRowsAction(Action):
 
         for x in xrange(1, 101):
             result.append({
+                'id': x,
                 'code': x,
                 'name': u'Запись #{}'.format(x),
             })

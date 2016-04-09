@@ -36,6 +36,7 @@ class RegistryListWindow(ExtWindow):
         self.layout = 'border'
         self.maximizable = True
         self.minimizable = True
+        self.template_globals = 'RegistryListWindow.js'
 
         self.grid = self.create_grid()
 
@@ -43,16 +44,19 @@ class RegistryListWindow(ExtWindow):
 
         reports = all_reports()
 
-        for report in reports:
-            pass
+        for i, report in enumerate(reports):
+            if i <= 3:
+                handler = 'printReport({})'
+            else:
+                handler = 'showReport({})'
 
-        menu.items.append(
-            ExtContextMenuItem(
-                text=u'Тестовый отчет',
-                icon_cls='doc-print',
-                handler='Ext.emptyFn',
+            menu.items.append(
+                ExtContextMenuItem(
+                    text=report.name + (i <= 3 and ' == ' or ''),
+                    icon_cls='doc-print',
+                    handler=handler.format(report.id),
+                )
             )
-        )
 
         button_report = ExtToolbarMenu(
             icon_cls='icon-printer',

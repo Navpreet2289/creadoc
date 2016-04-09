@@ -69,6 +69,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/downloads/'
 
 
+CREADOC_URL = 'creadoc'
 # Наименование директории в MEDIA_ROOT, в которую сохраняются шаблоны
 CREADOC_REPORTS_DIR = 'reports'
 # Путь до директории с шаблонами
