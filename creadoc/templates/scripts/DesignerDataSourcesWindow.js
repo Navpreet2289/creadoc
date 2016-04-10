@@ -84,6 +84,7 @@ function saveSources() {
             'report_id': win.actionContextJson['report_id']
         },
         'success': function(response) {
+            // По окончанию сохранения отправляем событие во фрейм
             var result = win.fireEvent('afterSaveSources', fullRows);
 
             if (result) {

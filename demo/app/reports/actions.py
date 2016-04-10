@@ -13,8 +13,8 @@ class ReportListActionPack(ActionPack):
     u"""
     Базовый пак для списка отчетов
     """
-    url = '/reports'
-    title = title_plural = u'Список отчетов'
+    url = '/reestr'
+    title = title_plural = u'Тестовый реестр записей'
 
     def __init__(self):
         super(ReportListActionPack, self).__init__()

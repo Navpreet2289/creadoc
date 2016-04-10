@@ -1,5 +1,6 @@
 var iframe = Ext.get('creadoc-iframe');
 var iframeWindow = iframe.dom.contentWindow;
+// Текущий идентификатор шаблона
 var reportId = Ext.decode('{{ component.report_id }}');
 
 // url для сохранения шаблона
@@ -8,6 +9,18 @@ var reportSaveUrl = '{{ component.save_report_url }}';
 var reportReleaseUrl = '{{ component.release_report_url }}';
 // url для открытия окна со списком доступных и подключенных источников данных
 var reportSourcesWindowUrl = '{{ component.sources_window_url }}';
+
+
+var autoSaver;
+// Промежуток в секундах между запусками процедуры автосохранения
+var autoSaveTimeOut = Ext.decode('{{ component.autosave_timeout }}');
+
+
+win.on('show', function() {
+    // Инициализация автосохранения
+    autoSaver = new AutoSaver(autoSaveTimeOut).run();
+});
+
 
 // Код клавиши "S"
 var CharCodeS = 19;
@@ -75,6 +88,8 @@ function closeWindow() {
                 requestReleaseReport(function() {
                     win.close(true);
                 });
+                // При успешном закрытии окна очищаем сессию из кэша
+                autoSaver.removeSession();
             }
         }
     );
@@ -185,8 +200,9 @@ function saveTemplateAs() {
  * @param callback Функция обратного вызова, срабатывающая после ввода наименования.
  *  На вход первым параметром получает введенное наименование.
  * @param message Кастомное сообщение в окне ввода наименования шаблона
+ * @param declineCallback Функция, срабатывающая при отказе от ввода наименования
  */
-function showNameChangeDialog(callback, message) {
+function showNameChangeDialog(callback, message, declineCallback) {
     if (!message) {
         message = 'Введите наименование шаблона';
     }
@@ -244,4 +260,121 @@ function openDataSourceWindowRequest(reportId) {
     };
 
     Ext.Ajax.request(request);
+}
+
+
+/**
+ * Автосохранение шаблона в локальном кэше
+ * @param timeout Интервал между вызовами процедуры сохранения
+ */
+function AutoSaver(timeout) {
+    var self = this;
+    var sessionKey = 'creadoc_designer_session';
+    var intervalId;
+
+    self.timeout = timeout;
+    self.storage = window.localStorage;
+
+    // Фэлбэк на случай отсутствия поддержки локального хранилища
+    if (!self.storage) {
+        return {
+            'getTemplate': Ext.emptyFn,
+            'hasPreviousSession': Ext.emptyFn,
+            'createSession': Ext.emptyFn,
+            'updateSession': Ext.emptyFn,
+            'removeSession': Ext.emptyFn,
+            'run': Ext.emptyFn
+        }
+    }
+
+    /**
+     * Запращивает у дизайнера текущее состояния шаблона и
+     * передает его в указанную первым аргументом функцию
+     * @param callback Функция обратного вызова, получает на вход объект шаблона
+     */
+    self.getTemplate = function(callback) {
+        iframeWindow.dispatchEvent(getTemplateEvent(callback));
+    };
+
+    /**
+     * Проверка наличия незавершенной сессии
+     * @returns {boolean}
+     */
+    self.hasPreviousSession = function() {
+        return !!self.storage.getItem(sessionKey);
+    };
+
+    /**
+     * Создание новой сессии
+     */
+    self.createSession = function() {
+        self.getTemplate(function(template) {
+            self.storage.setItem(sessionKey, template);
+        });
+    };
+
+    /**
+     * Обновление сессии
+     */
+    self.updateSession = function() {
+        self.createSession();
+    };
+
+    /**
+     * Удаление сессии
+     */
+    self.removeSession = function() {
+        self.storage.removeItem(sessionKey);
+
+        intervalId ? window.clearInterval(intervalId) : null;
+    };
+
+    /**
+     * Перезапуск сессии
+     */
+    self.reloadSession = function() {
+        self.removeSession();
+        self.run();
+    };
+
+    /**
+     * Запуск логики автосохранения
+     */
+    self.run = function() {
+        // Если предыдущей сессии не найдено, то просто создаем и запускаем новую
+        if (!self.hasPreviousSession()) {
+            self.createSession();
+
+            intervalId = window.setInterval(function() {
+                self.updateSession();
+            }, self.timeout);
+        } else {
+            Ext.Msg.confirm(
+                'Внимание!',
+                'Предыдущая сессия была некорректно завершена!<br>' +
+                'Вы можете сохранить предыдущую сессию как отдельный шаблон, ' +
+                'чтобы продолжить его редактирование позднее.<br>' +
+                'В случае отказа от сохранения данные предыдущей сессии будут удалены.<br>' +
+                'Вы хотите сохранить предыдущую сессию как новый шаблон?',
+                function(result) {
+                    if (result == 'yes') {
+                        var template = self.storage.getItem(sessionKey);
+
+                        // Сохранение отчета
+                        showNameChangeDialog(function(name) {
+                            saveRequest(0, name, template);
+                        }, false, function() {
+
+                        });
+                    }
+
+                    // После сохранения отчета
+                    // сбрасываем предыдущую сессию и перезапускаем ее
+                    self.reloadSession();
+                }
+            );
+        }
+
+        return self;
+    }
 }

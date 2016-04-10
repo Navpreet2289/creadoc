@@ -69,6 +69,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/downloads/'
 
 
+# Фрагмент url, по которому доступен контроллер модуля CreaDoc
 CREADOC_URL = 'creadoc'
 # Наименование директории в MEDIA_ROOT, в которую сохраняются шаблоны
 CREADOC_REPORTS_DIR = 'reports'
@@ -76,3 +77,6 @@ CREADOC_REPORTS_DIR = 'reports'
 CREADOC_REPORTS_ROOT = os.path.join(MEDIA_ROOT, CREADOC_REPORTS_DIR)
 # URL, по которому доступны шаблоны
 CREADOC_REPORTS_URL = MEDIA_URL + CREADOC_REPORTS_DIR + '/'
+# Промежутки (в секундах) между запусками процедуры автосохранения.
+# Сохранение производится в локальный браузерный кэш (localStorage).
+CREADOC_DESIGNER_LOCAL_AUTOSAVE_TIMEOUT = 60

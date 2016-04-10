@@ -1,7 +1,7 @@
 # coding: utf-8
 from creadoc.report.helpers import variable_creator
 from creadoc.report.registry import CR
-from creadoc.report.variable import VariableType
+from creadoc.report.enums import ValueType
 from demo.app.example.actions import ReportTestData4Action
 
 
@@ -25,6 +25,6 @@ CR.add_variables(
         'OperationDate',
         '01.01.2012',
         category=u'ЗиК',
-        v_type=VariableType.DATETIME,
+        v_type=ValueType.DATETIME,
         description=u'Рабочая дата учреждения'),
 )

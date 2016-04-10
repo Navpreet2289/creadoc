@@ -1,6 +1,7 @@
 # coding: utf-8
 from creadoc.report.constants import BASE_CATEGORY
-from creadoc.report.variable import Variable, VariableType
+from creadoc.report.variable import Variable
+from creadoc.report.enums import ValueType
 
 __author__ = 'damirazo <me@damirazo.ru>'
 
@@ -13,13 +14,13 @@ def variable_creator(name, value, category=None, description=None, v_type=None):
     :param category: Наименование категории
     :param description: Описание переменной
     :param v_type: Тип переменной
-    :return: ElementDataSource
+    :rtype: Variable
     """
     variable = Variable(
         name=name,
         category=category or BASE_CATEGORY,
         description=description or u'',
-        v_type=v_type or VariableType.STRING,
+        v_type=v_type or ValueType.STRING,
     )
 
     if callable(value):

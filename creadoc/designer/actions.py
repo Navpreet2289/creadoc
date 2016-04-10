@@ -107,29 +107,9 @@ class CreadocDesignerShowAction(Action):
             self.parent.action_report_release.get_absolute_url())
         win.sources_window_url = (
             self.parent.pack_data_source.action_list.get_absolute_url())
+        win.autosave_timeout = settings.CREADOC_DESIGNER_LOCAL_AUTOSAVE_TIMEOUT
 
         return ExtUIScriptResult(win, context)
-
-
-class CreadocDesignerReportRelease(Action):
-    u"""
-    Освобождение блокировки шаблона после закрытия окна редактирования
-    """
-    url = '/release'
-
-    def context_declaration(self):
-        return {
-            'report_id': {'type': 'int', 'required': True, 'default': None},
-        }
-
-    def run(self, request, context):
-        if context.report_id:
-            mutex = CreadocMutex(context.report_id)
-
-            if not mutex.is_free():
-                mutex.release()
-
-        return OperationResult()
 
 
 class CreadocDesignerIframeAction(Action):
@@ -333,6 +313,27 @@ class CreadocDesignerReportDeleteAction(Action):
             result = OperationResult()
 
         return result
+
+
+class CreadocDesignerReportRelease(Action):
+    u"""
+    Освобождение блокировки шаблона после закрытия окна редактирования
+    """
+    url = '/release'
+
+    def context_declaration(self):
+        return {
+            'report_id': {'type': 'int', 'required': True, 'default': None},
+        }
+
+    def run(self, request, context):
+        if context.report_id:
+            mutex = CreadocMutex(context.report_id)
+
+            if not mutex.is_free():
+                mutex.release()
+
+        return OperationResult()
 
 
 class CreadocDesignerDataSourceActionPack(ActionPack):
