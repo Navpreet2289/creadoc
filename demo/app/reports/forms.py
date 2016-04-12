@@ -45,16 +45,11 @@ class RegistryListWindow(ExtWindow):
         reports = get_reports()
 
         for i, report in enumerate(reports):
-            if i <= 3:
-                handler = 'printReport({})'
-            else:
-                handler = 'showReport({})'
-
             menu.items.append(
                 ExtContextMenuItem(
-                    text=report.name + (i <= 3 and ' == ' or ''),
+                    text=report.name,
                     icon_cls='doc-print',
-                    handler=handler.format(report.id),
+                    handler='showReport({})'.format(report.id),
                 )
             )
 

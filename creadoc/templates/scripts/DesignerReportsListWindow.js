@@ -18,3 +18,28 @@ function refreshStoreHandler(cmp, response, request) {
 
     return false;
 }
+
+function importTemplate() {
+    var record = getSelectedRecord();
+    if (record) {
+
+    }
+}
+
+
+function exportTemplate() {
+    var record = getSelectedRecord();
+    if (record) {
+
+    }
+}
+
+
+function getSelectedRecord() {
+    var sm = grid.getSelectionModel();
+    if (sm.hasSelection()) {
+        return sm.getSelected();
+    }
+
+    return showWarning('Не выбрана запись!');
+}

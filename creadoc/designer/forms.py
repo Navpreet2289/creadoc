@@ -1,6 +1,7 @@
 # coding: utf-8
 from m3_ext.ui.containers import ExtPanel, ExtContainer as Cnt
-from m3_ext.ui.containers.containers import ExtToolBar
+from m3_ext.ui.containers.containers import ExtToolBar, ExtToolbarMenu
+from m3_ext.ui.containers.context_menu import ExtContextMenu, ExtContextMenuItem
 from m3_ext.ui.controls import ExtButton
 from m3_ext.ui.icons import Icons
 from m3_ext.ui.panels import ExtObjectGrid
@@ -63,25 +64,9 @@ class DesignerIframeWindow(ExtEditWindow):
         }
         self.btn_data_sources.text = u'Источники данных'
 
-        # Кнопка загрузки пользовательского шаблона
-        self.btn_import = ExtButton()
-        self.btn_import.handler = 'Ext.emptyFn'
-        self.btn_import.style = {'float': 'left', 'margin': '4px 0 0 10px'}
-        self.btn_import.disabled = True
-        self.btn_import.text = u'Импорт шаблона'
-
-        # Кнопка выгрузки шаблона
-        self.btn_export = ExtButton()
-        self.btn_export.handler = 'Ext.emptyFn'
-        self.btn_export.style = {'float': 'left', 'margin': '4px 0 0 10px'}
-        self.btn_export.disabled = True
-        self.btn_export.text = u'Экспорт шаблона'
-
         self.bottom_bar = Cnt()
         self.bottom_bar.height = 30
         self.bottom_bar.items.extend([
-            self.btn_import,
-            self.btn_export,
             self.btn_data_sources,
             self.btn_close,
             self.btn_save,
@@ -129,6 +114,28 @@ class DesignerReportsListWindow(ExtWindow):
         self.template_globals = 'scripts/DesignerReportsListWindow.js'
 
         self.grid = self.create_grid()
+
+        menu = ExtContextMenu()
+        menu.items.extend([
+            ExtContextMenuItem(
+                text=u'Импорт шаблона',
+                icon_cls='doc-print',
+                handler='Ext.emptyFn'
+            ),
+            ExtContextMenuItem(
+                text=u'Экспорт шаблона',
+                icon_cls='doc-print',
+                handler='Ext.emptyFn'
+            ),
+        ])
+
+        button_report = ExtToolbarMenu(
+            icon_cls='icon-database',
+            menu=menu,
+            text=u'Функции',
+        )
+
+        self.grid.top_bar.items.append(button_report)
 
         self.items.append(self.grid)
 
