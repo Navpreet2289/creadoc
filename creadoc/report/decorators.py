@@ -12,7 +12,7 @@ def data_source(alias, guid, name):
     :param guid: Уникальный идентификатор источника данных
     :param name: Наименование источника,
         под которым он будет отображаться в общем списке источников данных
-    :rtype: object
+    :rtype: Action
     """
 
     def _run_wrapper(fn):

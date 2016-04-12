@@ -10,6 +10,7 @@
     <script>
         // Инициализация просмотрщика
         window.onload = function() {
+            {% block render_logic %}
             // Загружаем файл локализации и устанавливаем его по умолчанию
             Stimulsoft.Base.Localization.StiLocalization.setLocalizationFile("/static/local/ru.xml", true);
 
@@ -76,6 +77,7 @@
             viewer.report = report;
 
             viewer.renderHtml("viewerContent");
+            {% endblock %}
         };
 
         /**

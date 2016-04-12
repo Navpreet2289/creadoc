@@ -158,7 +158,12 @@ class DesignerDataSourcesWindow(ExtEditWindow):
             'hidden': True,
         },
         {
-            'header': u'Наименование',
+            'header': u'Имя переменной в шаблоне',
+            'data_index': 'alias',
+            'sortable': True,
+        },
+        {
+            'header': u'Описание переменной',
             'data_index': 'name',
             'sortable': True,
         },

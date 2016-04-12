@@ -1,10 +1,10 @@
 # coding: utf-8
 from m3_ext.ui.containers import ExtToolbarMenu
-from m3_ext.ui.containers.context_menu import ExtContextMenu, ExtContextMenuItem
+from m3_ext.ui.containers.context_menu import (
+    ExtContextMenu, ExtContextMenuItem)
 from m3_ext.ui.panels import ExtObjectGrid
 from m3_ext.ui.windows import ExtWindow
-
-from creadoc.api import all_reports
+from creadoc.api import get_reports
 
 
 class RegistryListWindow(ExtWindow):
@@ -42,7 +42,7 @@ class RegistryListWindow(ExtWindow):
 
         menu = ExtContextMenu()
 
-        reports = all_reports()
+        reports = get_reports()
 
         for i, report in enumerate(reports):
             if i <= 3:

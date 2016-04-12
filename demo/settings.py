@@ -77,6 +77,6 @@ CREADOC_REPORTS_DIR = 'reports'
 CREADOC_REPORTS_ROOT = os.path.join(MEDIA_ROOT, CREADOC_REPORTS_DIR)
 # URL, по которому доступны шаблоны
 CREADOC_REPORTS_URL = MEDIA_URL + CREADOC_REPORTS_DIR + '/'
-# Промежутки (в секундах) между запусками процедуры автосохранения.
+# Промежутки (в миллисекундах) между запусками процедуры автосохранения.
 # Сохранение производится в локальный браузерный кэш (localStorage).
-CREADOC_DESIGNER_LOCAL_AUTOSAVE_TIMEOUT = 60
+CREADOC_DESIGNER_LOCAL_AUTOSAVE_TIMEOUT = 6000

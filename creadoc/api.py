@@ -3,7 +3,7 @@ from django.db.models import Q
 from creadoc.models import CreadocReport
 
 
-def all_reports(on_date=None):
+def get_reports(on_date=None):
     u"""
     Список всех доступных отчетов
     :param on_date: Дата, на которую ищутся актуальные отчеты

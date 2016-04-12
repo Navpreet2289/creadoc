@@ -4,7 +4,6 @@ from django.template import loader
 from django.template.context import Context
 from m3 import ApplicationLogicException
 from m3.actions import ActionPack, Action
-from m3.actions.context import ActionContext
 from m3_ext.ui.results import ExtUIScriptResult
 from creadoc.models import CreadocReport
 from creadoc.report.registry import CR
@@ -39,6 +38,11 @@ class CreadocViewerShowAction(Action):
     def context_declaration(self):
         return {
             'report_id': {'type': 'int', 'required': True},
+            'background_mode': {
+                'type': 'boolean',
+                'required': True,
+                'default': False,
+            },
             'params': {'type': 'json', 'required': True, 'default': {}},
         }
 
@@ -53,11 +57,8 @@ class CreadocViewerShowAction(Action):
 
         win = ViewerIframeWindow(
             url=self.parent.action_iframe.get_absolute_url(),
-            report=report, params=context.params)
-
-        if getattr(win, 'action_context', None) is None:
-            win.action_context = ActionContext()
-        win.action_context.params = context.params
+            report=report,
+            params=context.params)
 
         return ExtUIScriptResult(win, context)
 

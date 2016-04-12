@@ -12,7 +12,7 @@ var reportSourcesWindowUrl = '{{ component.sources_window_url }}';
 
 
 var autoSaver;
-// Промежуток в секундах между запусками процедуры автосохранения
+// Промежуток в миллисекундах между запусками процедуры автосохранения
 var autoSaveTimeOut = Ext.decode('{{ component.autosave_timeout }}');
 
 
@@ -101,12 +101,14 @@ function closeWindow() {
 /**
  * Отправка запроса на освобождение мьютекса
  * @param callback Функция, вызываемая по окончанию запроса
+ * @param rId Идентификатор отчета.
+ *  В случае отсутствия берется идентификатор открытого в данный момент отчета.
  */
-function requestReleaseReport(callback) {
+function requestReleaseReport(callback, rId) {
     var request = {
         'url': reportReleaseUrl,
         'params': {
-            'report_id': reportId
+            'report_id': rId !== undefined ? rId : reportId
         },
         success: callback,
         failure: function() {
@@ -213,6 +215,8 @@ function showNameChangeDialog(callback, message, declineCallback) {
         function(result, name) {
             if (result == 'ok' && name) {
                 callback(name);
+            } else {
+                declineCallback();
             }
         }
     );
@@ -268,9 +272,10 @@ function openDataSourceWindowRequest(reportId) {
  * @param timeout Интервал между вызовами процедуры сохранения
  */
 function AutoSaver(timeout) {
+    var intervalId;
     var self = this;
     var sessionKey = 'creadoc_designer_session';
-    var intervalId;
+    var reportIdKey = 'report_id';
 
     self.timeout = timeout;
     self.storage = window.localStorage;
@@ -310,6 +315,7 @@ function AutoSaver(timeout) {
     self.createSession = function() {
         self.getTemplate(function(template) {
             self.storage.setItem(sessionKey, template);
+            self.storage.setItem(reportIdKey, reportId);
         });
     };
 
@@ -325,6 +331,7 @@ function AutoSaver(timeout) {
      */
     self.removeSession = function() {
         self.storage.removeItem(sessionKey);
+        self.storage.removeItem(reportIdKey);
 
         intervalId ? window.clearInterval(intervalId) : null;
     };
@@ -358,13 +365,22 @@ function AutoSaver(timeout) {
                 'Вы хотите сохранить предыдущую сессию как новый шаблон?',
                 function(result) {
                     if (result == 'yes') {
+                        var rId = self.storage.getItem(reportIdKey);
                         var template = self.storage.getItem(sessionKey);
 
                         // Сохранение отчета
                         showNameChangeDialog(function(name) {
                             saveRequest(0, name, template);
-                        }, false, function() {
 
+                            // Если в сессии висит уже сохраненный ранее шаблон,
+                            // то нам нужно освободить его от мьютекса
+                            if (rId && rId > 0) {
+                                requestReleaseReport(Ext.emptyFn, rId);
+                            }
+                        }, false, function() {
+                            // Если пользователь отказался ввести наименование отчета,
+                            // то сам дурак. Удаляем данные сессии.
+                            self.reloadSession();
                         });
                     }
 

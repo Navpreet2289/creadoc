@@ -11,6 +11,8 @@ from m3.actions import (
 from m3.actions.context import ActionContext
 from m3_ext.ui.misc import ExtDataStore
 from m3_ext.ui.results import ExtUIScriptResult
+
+from creadoc.api import get_reports
 from creadoc.designer.forms import (
     DesignerIframeWindow, DesignerReportsListWindow,
     DesignerDataSourcesWindow)
@@ -60,6 +62,7 @@ class CreadocDesignerActionPack(ActionPack):
         # Список сабпаков
         # ---------------------------------------------------------------------
 
+        # Общий пак для всех подключаемых источников данных
         self.pack_data_source = CreadocDesignerDataSourceActionPack()
 
         self.subpacks.extend([
@@ -102,11 +105,16 @@ class CreadocDesignerShowAction(Action):
             frame_url=url,
             report_id=context.report_id,
         )
+        # url для сохранения отчета
         win.save_report_url = self.parent.action_report_save.get_absolute_url()
+        # url для снятия мьютекса с отчета
         win.release_report_url = (
             self.parent.action_report_release.get_absolute_url())
+        # url для открытия окна
+        # со списком доступных и подключенных источников данных
         win.sources_window_url = (
             self.parent.pack_data_source.action_list.get_absolute_url())
+        # Интервал между периодами автосохранения
         win.autosave_timeout = settings.CREADOC_DESIGNER_LOCAL_AUTOSAVE_TIMEOUT
 
         return ExtUIScriptResult(win, context)
@@ -184,7 +192,7 @@ class CreadocDesignerReportRowsAction(Action):
     url = '/rows'
 
     def run(self, request, context):
-        rows = CreadocReport.objects.all()
+        rows = CreadocReport.objects.filter(state=True).order_by('created_at')
 
         return PreJsonResult({'rows': list(rows), 'count': rows.count()})
 
@@ -376,7 +384,7 @@ class CreadocDesignerDataSourceListAction(Action):
         plugged = []
         unplugged = []
         for row in sources:
-            record = (row.guid, row.alias, row.get_absolute_url())
+            record = (row.guid, row.alias, row.name, row.get_absolute_url())
 
             if row.guid in plugged_sources:
                 plugged.append(record)

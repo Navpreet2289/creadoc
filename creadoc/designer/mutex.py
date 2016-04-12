@@ -26,6 +26,10 @@ class CreadocMutex(object):
         )
 
     def is_free(self):
+        u"""
+        Проверка записи на наличие наложенного мьютекса
+        :rtype: bool
+        """
         try:
             row = self.row()
         except MutexModel.DoesNotExist:
@@ -43,12 +47,18 @@ class CreadocMutex(object):
         return False
 
     def capture(self):
+        u"""
+        Захват записи мьютексом
+        """
         try:
             capture_mutex(self.mutex_id)
         except MutexBusy:
             pass
 
     def release(self):
+        u"""
+        Освобождение записи от мьютекса
+        """
         try:
             release_mutex(self.mutex_id)
         except MutexBusy:
