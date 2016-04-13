@@ -1,4 +1,5 @@
 var grid = Ext.getCmp('{{ component.grid.client_id }}');
+var exportUrl = '{{ component.url_export }}';
 
 grid.on('aftereditrequest', refreshStoreHandler);
 grid.on('afternewrequest', refreshStoreHandler);
@@ -30,7 +31,17 @@ function importTemplate() {
 function exportTemplate() {
     var record = getSelectedRecord();
     if (record) {
-
+        var request = {
+            url: exportUrl,
+            params: {'report_id': record.get('id')},
+            success: function(response) {
+                smart_eval(response.responseText);
+            },
+            failure: function() {
+                uiAjaxFailMessage.apply(this, arguments);
+            }
+        };
+        Ext.Ajax.request(request);
     }
 }
 

@@ -125,7 +125,7 @@ class DesignerReportsListWindow(ExtWindow):
             ExtContextMenuItem(
                 text=u'Экспорт шаблона',
                 icon_cls='doc-print',
-                handler='Ext.emptyFn'
+                handler='exportTemplate'
             ),
         ])
 

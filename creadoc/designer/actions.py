@@ -1,6 +1,10 @@
 # coding: utf-8
 import os
+import json
 import uuid
+import datetime
+from zipfile import ZipFile
+from operator import attrgetter
 from django.db import transaction
 from django.conf import settings
 from django.http import HttpResponse
@@ -11,8 +15,6 @@ from m3.actions import (
 from m3.actions.context import ActionContext
 from m3_ext.ui.misc import ExtDataStore
 from m3_ext.ui.results import ExtUIScriptResult
-
-from creadoc.api import get_reports
 from creadoc.designer.forms import (
     DesignerIframeWindow, DesignerReportsListWindow,
     DesignerDataSourcesWindow)
@@ -45,7 +47,8 @@ class CreadocDesignerActionPack(ActionPack):
         self.action_report_edit = CreadocDesignerReportEditAction()
         self.action_report_save = CreadocDesignerReportSaveAction()
         self.action_report_delete = CreadocDesignerReportDeleteAction()
-        self.action_report_release = CreadocDesignerReportRelease()
+        self.action_report_release = CreadocDesignerReportReleaseAction()
+        self.action_report_export = CreadocDesignerReportExportAction()
 
         self.actions.extend([
             self.action_show,
@@ -57,6 +60,7 @@ class CreadocDesignerActionPack(ActionPack):
             self.action_report_save,
             self.action_report_delete,
             self.action_report_release,
+            self.action_report_export,
         ])
 
         # Список сабпаков
@@ -181,6 +185,7 @@ class CreadocDesignerReportListAction(Action):
         win.grid.action_new = self.parent.action_report_new
         win.grid.action_edit = self.parent.action_report_edit
         win.grid.action_delete = self.parent.action_report_delete
+        win.url_export = self.parent.action_report_export.get_absolute_url()
 
         return ExtUIScriptResult(win, context)
 
@@ -323,7 +328,7 @@ class CreadocDesignerReportDeleteAction(Action):
         return result
 
 
-class CreadocDesignerReportRelease(Action):
+class CreadocDesignerReportReleaseAction(Action):
     u"""
     Освобождение блокировки шаблона после закрытия окна редактирования
     """
@@ -342,6 +347,58 @@ class CreadocDesignerReportRelease(Action):
                 mutex.release()
 
         return OperationResult()
+
+
+class CreadocDesignerReportExportAction(Action):
+    u"""
+    Экспорт шаблона
+    """
+    url = '/export'
+
+    def context_declaration(self):
+        return {
+            'report_id': {'type': 'int', 'required': True},
+        }
+
+    def run(self, request, context):
+        try:
+            report = CreadocReport.objects.get(pk=context.report_id)
+        except CreadocReport.DoesNotExist:
+            raise ApplicationLogicException((
+                u'Шаблон с id={} отсутствует!'
+            ).format(context.report_id))
+
+        # Извлекаем все подключенные к шаблону источники данных
+        report_sources = CreadocReportDataSource.objects.filter(report=report)
+        sources = map(attrgetter('source_uid'), report_sources.iterator())
+
+        name = '{}.creadoc'.format(report.guid)
+        zip_path = os.path.join(settings.CREADOC_REPORTS_ROOT, name)
+
+        # Формирование архива с шаблоном
+        with ZipFile(zip_path, 'w') as f:
+            # Сохранение шаблона
+            f.write(report.path, 'report.json')
+            # Сохранение списка используемых источников данных
+            f.writestr('sources.json', json.dumps(sources))
+            # Сохранение мета-информации о шаблоне
+            f.writestr('META.json', json.dumps({
+                'name': report.name,
+                'guid': report.guid,
+                'datetime': datetime.datetime.now().strftime(
+                    '%Y-%m-%d %H:%M:%S'),
+            }))
+
+        file_url = settings.CREADOC_REPORTS_URL + name
+
+        safe_js_handler = '''function() {
+            var iframe = document.createElement("iframe");
+            iframe.src = '%s';
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+        }''' % file_url
+
+        return OperationResult(code=safe_js_handler)
 
 
 class CreadocDesignerDataSourceActionPack(ActionPack):
