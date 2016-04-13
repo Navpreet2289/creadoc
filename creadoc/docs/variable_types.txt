@@ -1,49 +1,8 @@
-=======================================================================
-Единичная переменная
-
-Класс Stimulsoft.Report.Dictionary.StiVariable
-
-Добавление в доступ к отчету
-var variable = new Stimulsoft.Report.Dictionary.StiVariable(
-    category: string = String.empty,
-    name: string = String.empty,
-    alias: string = String.empty,
-    description: string = String.empty,
-    typeT: Type = String.getType(),
-    value: string = String.empty,
-    readOnly: boolean = false,
-    initBy: StiVariableInitBy = StiVariableInitBy.Value,
-    requestFromUser: boolean = false,
-    dialogInfo: StiDialogInfo = new StiDialogInfo(),
-    key: string = null,
-    allowUseAsSqlParameter: boolean = false
-)
-report.dictionary.variables.add(variable)
-
-=======================================================================
-Создание шаблона из json объекта
-
-var report = new Stimulsoft.Report.StiReport();
-report.load(EmptyReport);  // EmptyReport - переменная, содержащая шаблон
-
-Создание шаблона из файла
-
-var report = new Stimulsoft.Report.StiReport();
-report.loadFile("/static/reports/report.mrt");
-
-=======================================================================
-При создании нового отчета кнопкой "Создать" требуется снова прибиндить
-все переменные и источники данных
-
-=======================================================================
-
-
-Открыть окно добавления нового источника данных
-designer.InitializeSelectConnectionForm();
-
-
-=======================================================================
-Типы переменных
+===============================================================================
+ТИПЫ ПЕРЕМЕННЫХ.
+Используются для определения типов шаблонных переменных и определения типов
+столбцов источников данных
+===============================================================================
 
 String
 Stimulsoft.System.StimulsoftStringList

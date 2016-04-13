@@ -5,9 +5,8 @@ from creadoc.report.enums import ValueType
 from demo.app.example.actions import ReportTestData4Action
 
 
-CR.add_sources(
-    ReportTestData4Action,
-)
+# Регистрация источников данных
+CR.add_sources(ReportTestData4Action)
 
 
 # Регистрация шаблонных переменных
