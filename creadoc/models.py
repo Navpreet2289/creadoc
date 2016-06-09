@@ -44,7 +44,7 @@ class CreadocReport(models.Model):
         url, по которому доступен файл с шаблоном для скачивания
         """
         return '{}{}/{}.mrt'.format(
-            settings.MEDIA_URL,
+            settings.STATIC_URL,
             settings.CREADOC_REPORTS_DIR,
             self.guid)
 
