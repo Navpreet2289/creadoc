@@ -75,6 +75,16 @@ Creadoc состоит из двух базовых компонентов - **D
         element=designer_root,
     )
 
+После этого нужно добавить пак, использующийся для загрузки источников данных в какой-либо контроллер:
+
+.. code-block:: python
+
+    def register_actions():
+        my_controller.extend_packs([
+            CreadocDataSourceActionPack(),
+        ])
+
+
 Далее необходимо создать требуемые для работы таблицы с БД, выполнив команды
 
 ``./manage.py syncdb``

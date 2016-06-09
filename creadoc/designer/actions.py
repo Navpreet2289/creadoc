@@ -441,7 +441,7 @@ class CreadocDesignerDataSourceListAction(Action):
         plugged = []
         unplugged = []
         for row in sources:
-            record = (row.guid, row.alias, row.name, row.get_absolute_url())
+            record = (row.guid, row.alias, row.name, row.url)
 
             if row.guid in plugged_sources:
                 plugged.append(record)

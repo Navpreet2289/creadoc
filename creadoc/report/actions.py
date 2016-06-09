@@ -1,5 +1,7 @@
 # coding: utf-8
-from m3.actions import ActionPack
+from m3.actions import (
+    ActionPack, Action, ApplicationLogicException, PreJsonResult)
+from creadoc.report.registry import CR
 
 
 class CreadocDataSourceActionPack(ActionPack):
@@ -7,26 +9,32 @@ class CreadocDataSourceActionPack(ActionPack):
     Пак для подвязывания источников данных,
     представляющих из себя обычные экшены
     """
-    url = '/data'
+    url = '/data-source'
 
-    def add_action_in_runtime(self, action, attr_name=None):
-        u"""
-        Привязка действия к паку в рантайме.
+    def __init__(self):
+        super(CreadocDataSourceActionPack, self).__init__()
 
-        Из-за особенностей реализации логики привязки экшенов
-        существует проблема, в связи с которой мы можем расширить
-        список действий только уже после привязки пака к контроллеру
-        и формирования ControllerCache. В связи с этим данный метод позволяет с
-        крыть внутреннюю реализацию подвязывания экшена,
-        однако на текущий момент использует защищенные методы.
+        self.action_router = CreadocDataSourceRouterAction()
 
-        :param action: Экземпляр экшена
-        :param attr_name: Наименование атрибута пака,
-            под которым будет доступен инстанс экшена
-        """
-        if attr_name is not None:
-            setattr(self, attr_name, action)
+        self.actions.append(self.action_router)
 
-        self.actions.append(action)
-        # Единственный приемлимый способ добавить экшен в рантайме
-        self.controller._build_pack_node(action, [self])
+
+class CreadocDataSourceRouterAction(Action):
+    url = '/router'
+
+    def context_declaration(self):
+        return {
+            'source_guid': {'type': 'str', 'required': True},
+        }
+
+    def run(self, request, context):
+        data_source = CR.source(context.source_guid)
+        if data_source is None:
+            raise ApplicationLogicException((
+                u'Источник данных с идентификатором {} отсутствует'
+            ).format(context.source_guid))
+
+        # TODO: Возможно надо передавать не весь контекст
+        result = data_source.data(request, context)
+
+        return PreJsonResult({data_source.alias: result})
