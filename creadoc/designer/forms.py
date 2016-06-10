@@ -1,8 +1,9 @@
 # coding: utf-8
-from m3_ext.ui.containers import ExtPanel, ExtContainer as Cnt
+from m3_ext.ui.containers import ExtPanel, ExtContainer as Cnt, ExtForm
 from m3_ext.ui.containers.containers import ExtToolBar, ExtToolbarMenu
 from m3_ext.ui.containers.context_menu import ExtContextMenu, ExtContextMenuItem
 from m3_ext.ui.controls import ExtButton
+from m3_ext.ui.fields import ExtFileUploadField
 from m3_ext.ui.icons import Icons
 from m3_ext.ui.panels import ExtObjectGrid
 from m3_ext.ui.windows import ExtEditWindow, ExtWindow
@@ -120,7 +121,7 @@ class DesignerReportsListWindow(ExtWindow):
             ExtContextMenuItem(
                 text=u'Импорт шаблона',
                 icon_cls='doc-print',
-                handler='Ext.emptyFn'
+                handler='importTemplate'
             ),
             ExtContextMenuItem(
                 text=u'Экспорт шаблона',
@@ -256,3 +257,52 @@ class DesignerDataSourcesWindow(ExtEditWindow):
             grid.add_column(**column)
 
         return grid
+
+
+class DesignerImportWindow(ExtEditWindow):
+    u"""
+    Окно импорта шаблона
+    """
+
+    def __init__(self):
+        super(DesignerImportWindow, self).__init__()
+
+        self.title = u'Импорт шаблона'
+        self.width = 300
+        self.height = 100
+        self.modal = True
+        self.template_globals = 'scripts/DesignerImportWindow.js'
+
+        self.form = ExtForm()
+        self.form.file_upload = True
+        self.form.label_width = 100
+
+        self.field_template = ExtFileUploadField()
+        self.field_template.name = 'template'
+        self.field_template.possible_file_extensions = ('creadoc',)
+        self.field_template.label = u'Шаблон'
+        self.field_template.anchor = '100%'
+        self.field_template.allow_blank = False
+
+        self.footer_bar = Cnt()
+        self.footer_bar.height = 30
+
+        self.button_submit = ExtButton()
+        self.button_submit.text = u'Импорт'
+        self.button_submit.width = 80
+        self.button_submit.style = {'float': 'right', 'margin': '4px 10px 0 0'}
+        self.button_submit.handler = 'submitForm'
+
+        self.button_cancel = ExtButton()
+        self.button_cancel.text = u'Отмена'
+        self.button_cancel.width = 80
+        self.button_cancel.style = {'float': 'right', 'margin': '4px 10px 0 0'}
+        self.button_cancel.handler = 'closeWindow'
+
+        self.footer_bar.items.extend([
+            self.button_cancel,
+            self.button_submit,
+        ])
+
+        self.form.items.append(self.field_template)
+        self.items.append(self.form)

@@ -6,8 +6,7 @@ from creadoc.report.registry import CR
 
 class CreadocDataSourceActionPack(ActionPack):
     u"""
-    Пак для подвязывания источников данных,
-    представляющих из себя обычные экшены
+    Пак для работы с источниками данных
     """
     url = '/data-source'
 
@@ -20,6 +19,9 @@ class CreadocDataSourceActionPack(ActionPack):
 
 
 class CreadocDataSourceRouterAction(Action):
+    u"""
+    Действие-маршрутизатор, управляет загрузкой источников данных
+    """
     url = '/router'
 
     def context_declaration(self):
@@ -35,6 +37,6 @@ class CreadocDataSourceRouterAction(Action):
             ).format(context.source_guid))
 
         # TODO: Возможно надо передавать не весь контекст
-        result = data_source.data(request, context)
+        result = data_source.load(request, context)
 
         return PreJsonResult({data_source.alias: result})

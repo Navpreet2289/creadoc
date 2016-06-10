@@ -1,4 +1,7 @@
 # coding: utf-8
+import os
+import uuid
+import tempfile
 from copy import copy
 from m3.actions import urls
 
@@ -28,3 +31,20 @@ def redirect_to_action(request, action, params=None):
         del request._request
 
     return controller.process_request(request)
+
+
+def get_tmp_file_path(file_name=None):
+    u"""
+    Создает временный файл во к каталоге временных файлов.
+    Использовать tempfile в проекте не надо,
+    работаем через этот метод api.
+
+    :param str or None: имя файла, если не задано то будет
+        само сгенерировано
+    :rtype unicode:
+    """
+    if not file_name or not isinstance(file_name, basestring):
+        file_name = '{}.tmp'.format(uuid.uuid4().get_hex())
+
+    return os.path.realpath(
+        os.path.join(tempfile.gettempdir(), file_name))
