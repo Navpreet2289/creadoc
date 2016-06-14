@@ -11,19 +11,10 @@ class Variable(object):
     возвращающий значение, которое требуется подставить в шаблон.
     Вызов осуществляется единожды при регистрации переменной в CreadocRegistry.
     """
-
-    def __init__(self, name, category, description, v_type):
-        u"""
-        :param name: Наименование переменной
-        :param category: Категория переменной.
-            Переменные с одной категорией группируются в одну "папку"
-        :param description: Описание переменной
-        :param v_type: Тип переменной. Значение из перечисления ValueType
-        """
-        self.name = name
-        self.category = category
-        self.description = description
-        self.type = v_type
+    name = None
+    category = None
+    description = None
+    type = None
 
     def value(self):
         raise NotImplementedError(u'Требуется реализовать метод value!')

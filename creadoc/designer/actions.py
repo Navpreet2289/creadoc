@@ -21,6 +21,7 @@ from creadoc.designer.forms import (
 from creadoc.designer.helpers import redirect_to_action, get_tmp_file_path
 from creadoc.designer.mutex import CreadocMutex
 from creadoc.models import CreadocReport, CreadocReportDataSource
+from creadoc.report.helpers import data_source_url
 from creadoc.report.registry import CR
 
 __author__ = 'damirazo <me@damirazo.ru>'
@@ -540,7 +541,8 @@ class CreadocDesignerDataSourceListAction(Action):
         plugged = []
         unplugged = []
         for row in sources:
-            record = (row.guid, row.alias, row.name, row.url)
+            url = data_source_url(row.guid)
+            record = (row.guid, row.alias, row.name, url)
 
             if row.guid in plugged_sources:
                 plugged.append(record)

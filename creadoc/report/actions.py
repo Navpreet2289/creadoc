@@ -26,16 +26,17 @@ class CreadocDataSourceRouterAction(Action):
 
     def context_declaration(self):
         return {
-            'source_guid': {'type': 'str', 'required': True},
+            'guid': {'type': 'str', 'required': True},
+            'params': {'type': 'json', 'required': True, 'default': {}},
         }
 
     def run(self, request, context):
-        data_source = CR.source(context.source_guid)
+        data_source = CR.source(context.guid)
         if data_source is None:
             raise ApplicationLogicException((
                 u'Источник данных с идентификатором {} отсутствует'
             ).format(context.source_guid))
 
-        result = data_source.load()
+        result = data_source.load(context.params)
 
         return PreJsonResult({data_source.alias: result})

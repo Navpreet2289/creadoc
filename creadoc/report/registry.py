@@ -3,6 +3,7 @@ from operator import attrgetter
 from creadoc.models import CreadocReportDataSource
 from creadoc.report.exceptions import (
     DuplicateVariableException, DuplicateDataSourceException)
+from creadoc.report.helpers import data_source_url
 
 __author__ = 'damirazo <me@damirazo.ru>'
 
@@ -61,9 +62,8 @@ class CreadocRegistry(object):
         :raise: DuplicateDataSourceException
         """
         for source in sources:
-            data_source = source()
-            alias = data_source.alias
-            guid = data_source.guid
+            alias = source.alias
+            guid = source.guid
 
             # Проверим, что такое имя переменной еще не использовалось
             if alias in cls.__source_aliases:
@@ -85,9 +85,9 @@ class CreadocRegistry(object):
                     cls.__source_guids[guid].__class__.__name__,
                 ))
 
-            cls.__sources.append(data_source)
-            cls.__source_aliases[alias] = data_source
-            cls.__source_guids[guid] = data_source
+            cls.__sources.append(source)
+            cls.__source_aliases[alias] = source
+            cls.__source_guids[guid] = source
 
     @classmethod
     def sources(cls):
@@ -99,23 +99,15 @@ class CreadocRegistry(object):
         return cls.__sources
 
     @classmethod
-    def connected_sources(cls, report_id, configuration_params=None):
+    def connected_sources(cls, report_id, params=None):
         u"""
         Список всех подключенных к шаблону с указанным id источников данных
         Для нового шаблона список будет пустым
 
         :param report_id: Идентификатор шаблона
-        :param configuration_params: Дополнительные настроечные параметры
-            источника данных
 
         :rtype: list
         """
-        def _wrap(fn):
-            def _wrapper(*args, **kwargs):
-                return fn(configuration_params, *args, **kwargs)
-
-            return _wrapper
-
         result = []
         # Собираем только подключенные к шаблону источники
         connected_source_ids = CreadocReportDataSource.objects.filter(
@@ -124,8 +116,8 @@ class CreadocRegistry(object):
 
         for source in cls.__sources:
             if source.guid in connected_source_ids:
-                source.load = _wrap(source.load)
-                result.append(source)
+                source_url = data_source_url(source.guid, params)
+                result.append((source_url, source))
 
         return result
 

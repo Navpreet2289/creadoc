@@ -65,9 +65,9 @@
             report.dictionary.dataSources.clear();
 
             // Привязка источников данных к шаблону
-            {% for source in sources %}
+            {% for url, source in sources %}
             var dataSet = new Stimulsoft.System.Data.DataSet();
-            dataSet.readJsonFile('{{ source.url | safe }}');
+            dataSet.readJsonFile('{{ url | safe }}');
             report.regData('{{ source.alias }}', '', dataSet);
             {% endfor %}
 

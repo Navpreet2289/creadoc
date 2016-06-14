@@ -29,7 +29,7 @@ class DesignerIframeWindow(ExtEditWindow):
 
         panel = ExtPanel()
         panel.html = (
-            u'<iframe id="creadoc-iframe" src="{}" width="99%" height="99%">'
+            u'<iframe id="designer-iframe" src="{}" width="99%" height="99%">'
             u'Фреймы не поддерживаются'
             u'</iframe>'
         ).format(frame_url)

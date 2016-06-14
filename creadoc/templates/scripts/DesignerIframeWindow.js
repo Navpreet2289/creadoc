@@ -1,4 +1,4 @@
-var iframe = Ext.get('creadoc-iframe');
+var iframe = Ext.get('designer-iframe');
 var iframeWindow = iframe.dom.contentWindow;
 // Текущий идентификатор шаблона
 var reportId = Ext.decode('{{ component.report_id }}');

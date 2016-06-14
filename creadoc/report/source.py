@@ -1,7 +1,4 @@
 # coding: utf-8
-from m3.actions import ControllerCache
-from creadoc.report.actions import CreadocDataSourceActionPack
-
 __author__ = 'damirazo'
 
 
@@ -32,6 +29,9 @@ class DataSource(object):
         Загрузка данных из источника.
         В случае отсутствия данных используется значение по умолчанию.
         """
+        if params is None:
+            params = {}
+
         return (
             self.data(params) or self.default_value(params)
         )
@@ -49,14 +49,15 @@ class DataSource(object):
         """
         raise NotImplementedError
 
-    @property
-    def url(self):
-        u"""
-        URL для загрузки источника данных
-        """
-        pack = ControllerCache.find_pack(CreadocDataSourceActionPack)
 
-        return '{}?source_guid={}'.format(
-            pack.action_router.get_absolute_url(),
-            self.guid,
-        )
+def required_params(*fields):
+    def inner(method):
+        def outer(self, params, *args, **kwargs):
+            for field in fields:
+                if field not in params:
+                    return self.default_value(params, *args, **kwargs)
+
+            return method(self, params, *args, **kwargs)
+
+        return outer
+    return inner
