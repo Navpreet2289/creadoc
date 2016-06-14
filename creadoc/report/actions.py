@@ -36,7 +36,6 @@ class CreadocDataSourceRouterAction(Action):
                 u'Источник данных с идентификатором {} отсутствует'
             ).format(context.source_guid))
 
-        # TODO: Возможно надо передавать не весь контекст
-        result = data_source.load(request, context)
+        result = data_source.load()
 
         return PreJsonResult({data_source.alias: result})

@@ -27,22 +27,22 @@ class DataSource(object):
     :type: None or str
     """
 
-    def load(self, request, context):
+    def load(self, params=None):
         u"""
         Загрузка данных из источника.
         В случае отсутствия данных используется значение по умолчанию.
         """
         return (
-            self.data(request, context) or self.default_value(request, context)
+            self.data(params) or self.default_value(params)
         )
 
-    def data(self, request, context):
+    def data(self, params):
         u"""
         Формирование набора данных для заполнения источника
         """
         raise NotImplementedError
 
-    def default_value(self, request, context):
+    def default_value(self, params):
         u"""
         Значение источника данных по умолчанию.
         Используется в случае отсутствия данных.

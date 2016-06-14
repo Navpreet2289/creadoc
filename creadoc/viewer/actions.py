@@ -93,6 +93,9 @@ class CreadocViewerIframeAction(Action):
         # Перечисление шаблонных переменных
         ctx['variables'] = CR.variables()
         # Перечисление подключенных источников данных
-        ctx['sources'] = CR.connected_sources(context.report_id)
+        ctx['sources'] = CR.connected_sources(
+            context.report_id,
+            configuration_params=context.params,
+        )
 
         return HttpResponse(t.render(ctx))

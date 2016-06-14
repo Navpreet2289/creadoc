@@ -99,13 +99,23 @@ class CreadocRegistry(object):
         return cls.__sources
 
     @classmethod
-    def connected_sources(cls, report_id):
+    def connected_sources(cls, report_id, configuration_params=None):
         u"""
         Список всех подключенных к шаблону с указанным id источников данных
         Для нового шаблона список будет пустым
+
         :param report_id: Идентификатор шаблона
+        :param configuration_params: Дополнительные настроечные параметры
+            источника данных
+
         :rtype: list
         """
+        def _wrap(fn):
+            def _wrapper(*args, **kwargs):
+                return fn(configuration_params, *args, **kwargs)
+
+            return _wrapper
+
         result = []
         # Собираем только подключенные к шаблону источники
         connected_source_ids = CreadocReportDataSource.objects.filter(
@@ -114,6 +124,7 @@ class CreadocRegistry(object):
 
         for source in cls.__sources:
             if source.guid in connected_source_ids:
+                source.load = _wrap(source.load)
                 result.append(source)
 
         return result
