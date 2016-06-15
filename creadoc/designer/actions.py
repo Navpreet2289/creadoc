@@ -273,6 +273,10 @@ class CreadocDesignerReportSaveAction(Action):
             report.guid = report_guid
             report.save()
 
+        reports_dir = os.path.dirname(report.path)
+        if not os.path.exists(reports_dir):
+            os.makedirs(reports_dir)
+
         with open(report.path, 'w+') as f:
             f.write(report_data.encode('utf-8'))
 
