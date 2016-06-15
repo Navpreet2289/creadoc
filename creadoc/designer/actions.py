@@ -18,7 +18,8 @@ from m3_ext.ui.results import ExtUIScriptResult
 from creadoc.designer.forms import (
     DesignerIframeWindow, DesignerReportsListWindow,
     DesignerDataSourcesWindow, DesignerImportWindow)
-from creadoc.designer.helpers import redirect_to_action, get_tmp_file_path
+from creadoc.designer.helpers import redirect_to_action, get_tmp_file_path, \
+    load_template
 from creadoc.designer.mutex import CreadocMutex
 from creadoc.models import CreadocReport, CreadocReportDataSource
 from creadoc.report.helpers import data_source_url
@@ -440,63 +441,7 @@ class CreadocDesignerReportImportAction(Action):
             raise ApplicationLogicException(
                 u'Не удалось загрузить шаблон')
 
-        zip_file = ZipFile(template)
-
-        # Получение мета-данных
-        with open(zip_file.extract('META.json', get_tmp_file_path()), 'r') as file_meta:  # noqa
-            meta_data = json.loads(file_meta.read())
-
-        if meta_data is None:
-            raise ApplicationLogicException(
-                u'Не удалось получить информацию о шаблоне. '
-                u'Возможно файл поврежден.')
-
-        # Если наименование шаблона не указали при импорте,
-        # то берем из мета-данных
-        report_guid = meta_data['guid']
-        report_name = context.name or meta_data['name']
-
-        if CreadocReport.objects.filter(guid=report_guid).exists():
-            raise ApplicationLogicException((
-                u'Шаблон с идентификатором {} уже присутствует. '
-                u'Удалите предыдущую версию перед запуском импортирования.'
-            ).format(report_guid))
-
-        # Получение списка подключенных источников
-        with open(zip_file.extract('sources.json', get_tmp_file_path()), 'r') as file_sources:  # noqa
-            sources = json.loads(file_sources.read())
-
-        template_name = '{}.mrt'.format(report_guid)
-        template_path = os.path.join(
-            settings.CREADOC_REPORTS_ROOT,
-            template_name)
-
-        # Сохраняем шаблон в общей директории шаблонов
-        with open(zip_file.extract('report.json', get_tmp_file_path()), 'r') as file_template:  # noqa
-            with open(template_path, 'w+') as dest_template:
-                dest_template.write(file_template.read())
-
-        report = CreadocReport()
-        report.guid = report_guid
-        report.name = report_name
-
-        if not request.user.is_anonymous():
-            report.author = request.user
-
-        report.save()
-
-        for source_uid in sources:
-            if CR.source(source_uid) is None:
-                raise ApplicationLogicException((
-                    u'Не удалось подключить источник данных '
-                    u'с идентификатором {}. '
-                    u'Источник данных отсутствует.'
-                ).format(source_uid))
-
-            source = CreadocReportDataSource()
-            source.report = report
-            source.source_uid = source_uid
-            source.save()
+        load_template(template, request.user)
 
         return OperationResult()
 

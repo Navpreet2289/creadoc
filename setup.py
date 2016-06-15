@@ -6,7 +6,7 @@ __author__ = 'damirazo <me@damirazo.ru>'
 
 setup(
     name='creadoc',
-    version='0.0.3',
+    version='0.0.4',
     description=u'Дизайнер отчетов на основе Stimulsoft Report Js',
     url='https://github.com/damirazo/creadoc',
     author='damirazo',
